@@ -1,0 +1,10 @@
+ID,Name,Age,Net worth,Country,Salary,Join Date,age_is_low_confidence_imputation,networth_is_imputed,salary_is_imputed
+1.0,Alice,25.0,30000.0,NZ,55000.0,2020-01-15,False,False,False
+2.0,Bob,30.0,35000.0,NZ,60000.0,2020-02-20,False,False,False
+4.0,Charlie,35.0,40000.0,AUS,72000.0,,False,False,False
+5.0,David,38.0,47884.91,NZ,68000.0,2019-11-01,False,True,False
+,Eve,29.0,22000.0,AUS,59000.0,,False,False,False
+7.0,,40.0,55000.0,NZ,65000.0,2018-05-30,False,False,False
+8.0,Grace,22.0,28000.0,,64000.0,2021-07-25,False,False,False
+9.0,Heidi,32.0,,AUS,,2021-07-25,True,False,False
+10.0,Ivan,27.0,60000.0,NZ,58000.0,2019-03-15,False,False,False
