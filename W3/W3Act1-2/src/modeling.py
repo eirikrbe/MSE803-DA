@@ -1,8 +1,8 @@
-"""Modelling, evaluation and validation helpers for the W4Act1 analysis.
+"""Modelling, evaluation and validation helpers for the W3Act1-2 analysis.
 
-Extracted from W4Act1_statistics.ipynb once the logic stabilised. Every function
-here is univariate by design (one predictor -> one target), matching the structure
-of the course sample code in scripts/.
+Extracted from W3Act1-2.ipynb once the logic stabilised. Every function
+here is univariate by design: one predictor -> one target. With 8-9 rows there is
+no room for more, and a single predictor keeps each fit readable.
 
 Evaluation deliberately reports adjusted R^2, leave-one-out CV and a mean-only
 baseline alongside R^2, because training R^2 cannot fall when a polynomial term is

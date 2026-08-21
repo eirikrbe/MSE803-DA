@@ -1,7 +1,7 @@
-"""Tests for the W4Act1 cleaning and modelling helpers.
+"""Tests for the W3Act1-2 cleaning and modelling helpers.
 
 Runs with pytest if available, or standalone:
-    data_env/bin/python3 W4/W4Act1/tests/test_cleaning.py
+    data_env/bin/python3 W3/W3Act1-2/tests/test_cleaning.py
 """
 
 import sys

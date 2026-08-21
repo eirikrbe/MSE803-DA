@@ -1,83 +1,187 @@
-# W4Act1 — Age / Salary / Net-worth Regression & Imputation
+# Week 13 – Activity 2: LLM-Powered New Zealand Travel Itinerary Generator
 
-MSE803 Data Analysis, Week 4 Activity 1. Cleans a small, deliberately messy dataset
-(10 raw rows → 9 people), compares linear vs. polynomial regression, and uses those
-models to impute missing values — reporting honestly on how little 9 rows can support.
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/eirikrbe/MSE800-PSD/tree/main/W13/W13Act2)
 
-## Project layout
+Command-line program that generates a self-drive New Zealand travel itinerary
+with the Google Gemini API. The traveller answers eight questions (trip length,
+month, route, budget, transport, interests, age) and the program makes one API
+call that returns a schema-enforced JSON itinerary; the program then renders it
+to Markdown and evaluates its own output. The main features are prompt engineering, token-cost control, and evaluation of LLM output through LLM-as-judge.
+output.
 
-| Folder | What lives there |
+## Overview
+
+The program runs as a pipeline:
+
+```mermaid
+flowchart TD
+    A[Traveller answers 8 questions]
+    --> B{TripRequest validation<br>Pydantic}
+
+    B -- Invalid --> X[Validation errors<br>0 tokens]
+
+    B -- Valid --> C[Build optimized prompt]
+
+    C --> C1[Count prompt tokens]
+
+    C1 --> D[Single Gemini inference<br>Thinking budget = 512]
+
+    D --> E[Pydantic parses JSON<br>Itinerary object]
+
+    E --> F[Render Markdown]
+
+    F --> G[Tier 1 rule checks<br>0 tokens]
+
+    G --> H{Run LLM judge?}
+
+    H -- Yes --> I[Tier 2 quality review]
+
+    H -- No --> J[Done]
+
+    I --> J
+```
+
+1. **Validate input**: a Pydantic `TripRequest` model checks every answer
+   (days 1–21, a real month name, a sensible age) before the program calls
+   the API; hence, invalid input never costs tokens.
+2. **One Gemini call**: the program builds the prompt from the validated
+   answers and forces the response into the `Itinerary` schema through
+   `response_schema`, so the output is always valid JSON instead of free text.
+3. **Render**: the itinerary object becomes a Markdown file that opens with an
+   honest feasibility note.
+4. **Evaluate**: free rule checks always run; an optional LLM-as-judge call
+   triages the remaining issues by severity.
+
+Unlike a traditional software application, an LLM application cannot assume
+that every generated response is correct; therefore, this project treats the
+LLM as a probabilistic component rather than a deterministic function. Instead
+of trusting the first response, the application not only validates the input
+and constrains the output with a schema, but also measures the token usage,
+performs rule-based verification, and optionally asks a second LLM to critique
+the result.
+
+## The Optimized Prompt
+
+The prompt combines five techniques: a role persona in the system instruction,
+delimiters that separate the traveller data from the instructions, numbered
+hard constraints, a few-shot quality example, and an escape hatch that
+instructs the model to admit when the request itself is infeasible instead of
+silently breaking a constraint.
+
+System instruction:
+
+```text
+You are Kiri, a senior New Zealand travel planner with 20 years of experience
+designing self-drive itineraries. You know real driving times between NZ towns,
+seasonal conditions (e.g. Tongariro Crossing and high-country roads in winter),
+and you never invent places that do not exist.
+```
+
+User prompt template (the `{fields}` are filled from the validated
+`TripRequest`):
+
+```text
+Plan a New Zealand trip using the traveller details below.
+
+### TRAVELLER DETAILS
+- Trip length: {days} days
+- Travel month: {month}
+- Start city: {start_city}
+- End city: {end_city}
+- Budget level: {budget}
+- Transport: {transport}
+- Interests: {interests}
+- Traveller age: {age}
+
+### HARD CONSTRAINTS
+1. Maximum 3 activities per day; fewer on long driving days.
+2. Driving legs must be realistic for NZ roads (assume ~70 km/h average).
+   Never schedule more than 4.5 hours of driving in one day.
+3. Every activity must be a real, named place with its real town.
+4. Match activities to the travel month (season, opening, weather).
+5. Match intensity to the traveller's age and stated interests.
+6. Day 1 starts in {start_city}; the final day ends in {end_city}.
+7. Keep each day's total load (driving hours + activity hours) under 9 hours.
+8. Use the stated transport for the entire trip — no flights. A rental car
+   crosses Cook Strait via the Interislander ferry (Wellington to Picton,
+   about 3.5 hours; rental cars are normally swapped at the ferry terminals).
+9. If driving_note says 'No driving today', every activity that day must be
+   walkable or reachable by local transport from the base town.
+10. If the route, trip length and transport cannot all fit within the driving
+    cap, still produce the best itinerary you can, but say so honestly in
+    feasibility_note and recommend a change (more days, a different start
+    city, or allowing one domestic flight). Never hide a broken constraint.
+
+### QUALITY EXAMPLE (one day, for style and detail level only — do not copy)
+Day 3 — Base: Rotorua. Driving: Taupo to Rotorua via SH5, about 1 hour.
+Activities: Te Puia (Hemo Rd, Tihiotonga, Rotorua) — geothermal valley and
+Maori cultural centre; watch the Pohutu geyser and a carving school in action,
+a relaxed 3-hour visit that suits any fitness level.
+
+Now produce the full {days}-day itinerary in the required JSON structure.
+```
+
+## Sample AI-Generated Itinerary
+
+[itinerary_Christchurch_to_Queenstown_2026-07-07.md](itinerary_Christchurch_to_Queenstown_2026-07-07.md)
+contains the full generated output for a 7-day December trip from Christchurch
+to Queenstown, with a mid-range budget and a rental car.
+
+## Token-Cost Optimization
+
+The first run billed 5,129 tokens; 71% of that total corresponded to thinking
+tokens, which Gemini bills at the expensive output rate. Capping the thinking
+budget with `ThinkingConfig(thinking_budget=512)` reduced the bill by two
+thirds without degrading the quality of the itinerary.
+
+| Version | Total billed tokens |
 |---|---|
-| `data/raw/` | Original input data, treated as read-only — never written to by the notebook. |
-| `data/processed/` | Cleaned data produced by the cleaning code alone; no model output. |
-| `models/` | Model output — the imputed values, with the model and confidence that produced each. |
-| `notebooks/` | The analysis notebook — cleaning, modelling, validation and write-up, in run order. |
-| `src/` | Reusable, importable functions the notebook calls; where logic goes once it stabilises. |
-| `tests/` | Unit tests for `src/`, runnable without executing the notebook. |
-| `figures/` | Every chart the notebook saves; all are regenerated on a full re-run. |
-| `scripts/` | Standalone reference code supplied with the assignment; not imported by anything. |
+| First run (unlimited thinking) | 5,129 |
+| Thinking capped at 512 | 1,719 |
 
-### Which output file to use
+In order to keep the cost visible, the program also prints its own usage after
+every call: `count_tokens` before sending the prompt, and `usage_metadata`
+(input / thinking / output) after receiving the response.
 
-A full run writes three files, and the distinction matters:
+## Self-Evaluation of the Output
 
-| File | Contents | Use it when |
-|---|---|---|
-| `data/processed/W4Act1_cleaned.csv` | 9 people, **observed values only**, gaps left empty | **Default.** Any descriptive statistic or downstream model. |
-| `models/predictions.csv` | The 2 imputed cells, with model and confidence per row | You want to know what was estimated and how much to trust it. |
-| `data/processed/W4Act1_cleaned_imputed.csv` | The two joined, plus boolean confidence flags | You need one dense table *and* have read the flags. |
+- **Tier 1, rule checks (0 tokens)**: plain Python re-tests the hard
+  constraints on the returned JSON (day count and numbering, activities per
+  day, the 4.5 h driving cap, the 9 h daily load, the packing-tip count, and
+  that the trip really ends in the requested city).
+- **Tier 2, LLM-as-judge (optional, one extra call)**: a second model reviews
+  the itinerary for problems that code cannot check, such as invented places,
+  unrealistic driving times, or a poor season fit, and sorts every finding
+  into critical (trip-breaking), warnings (the trip survives), or suggestions
+  (improvements). Severity buckets proved far more useful than 1–5 scores,
+  which were noisy and conflated "route impossible" with "museum is 45 minutes
+  further than implied".
 
-They are separate because they have different provenance. The cleaned file is a
-deterministic function of the raw CSV and the cleaning code — change a model and it does
-not move. The predictions depend on a fitted model, a chosen predictor and a seed.
+## Tech
 
-It also removes a footgun: in the joined file, Alice's observed `Age = 25` and Heidi's
-imputed `Age = 32.0` sit in the same column, separated only by a flag you have to know to
-filter on. Calling `df['Age'].mean()` on it silently folds in a value produced by a model
-with R² = 0.0000. The observed-only file cannot do that to you.
+Python, Google Gemini API (`google-genai`), Pydantic, python-dotenv
 
-### Why code lives in three places
-
-- **`notebooks/`** — exploration and narrative: prose, code and inline charts read top to
-  bottom as a report. Not importable, not tested.
-- **`src/`** — logic that has stopped changing, moved out of the notebook so it can be
-  imported and unit-tested. The notebook imports from here rather than redefining.
-- **`scripts/`** — a third category: a standalone reference script provided with the
-  assignment. Neither a module nor part of the pipeline; kept as supplied.
-
-## Running it
-
-The notebook reads and writes via paths relative to `notebooks/`, so run it from there
-(or with a tool that sets the notebook's own directory as the working directory):
+## Running
 
 ```bash
-data_env/bin/python3 -m nbconvert --to notebook --execute --inplace \
-    W4/W4Act1/notebooks/W4Act1_statistics.ipynb
+pip install google-genai pydantic python-dotenv
 ```
 
-A full run regenerates all 9 figures in `figures/` and rewrites
-`data/processed/W4Act1_cleaned_imputed.csv`. Nothing in `data/raw/` is modified. All
-figure output is deterministic — two consecutive runs produce byte-identical PNGs.
+Create a `.env` file next to the script (never commit it):
 
-Tests cover `src/` and run in about a second, without touching the notebook:
+```text
+GEMINI_API_KEY=your_key_here
+```
+
+Then:
 
 ```bash
-data_env/bin/python3 W4/W4Act1/tests/test_cleaning.py
+python W13Act2.py
 ```
 
-They use plain asserts, so they need no extra dependency, but are written to be picked
-up by `pytest` if it is ever installed.
+## Future Work
 
-## What the analysis covers
-
-- **Cleaning** — text-to-number parsing, comma-separated numerics, country
-  standardisation, date parsing, and merging one person split across two rows.
-- **Modelling** — univariate linear vs. degree-2 polynomial fits, judged on adjusted R²
-  and leave-one-out CV rather than training R² alone.
-- **Imputation** — one genuine regression-imputed value, one deliberately weak
-  demonstration model, and every filled cell tagged with its confidence.
-- **Validation** — held-out testing, exhaustive masking validation, and a permutation
-  test of whether any result is statistically decisive.
-
-Findings, caveats and known limitations are written up in the notebook itself; the
-Limitations section at the end is the short version.
+A future version could make the model self-check before returning: the program
+would feed the judge's critical findings back to the generator for one
+automatic revision pass (generate, evaluate, repair), so that the itinerary
+the user finally sees has already passed its own review.

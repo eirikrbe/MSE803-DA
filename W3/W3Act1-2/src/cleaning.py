@@ -1,6 +1,6 @@
-"""Data-cleaning helpers for the W4Act1 dataset.
+"""Data-cleaning helpers for the W3Act1-2 dataset.
 
-Extracted from W4Act1_statistics.ipynb once the logic stabilised, so it can be
+Extracted from W3Act1-2.ipynb once the logic stabilised, so it can be
 imported by the notebook and covered by tests in tests/test_cleaning.py.
 """
 
