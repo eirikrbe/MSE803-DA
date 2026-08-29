@@ -1,6 +1,6 @@
 # W4Act2 — World Happiness Dashboard
 
-[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue)]()
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com/eirikrbe/MSE803-DA/tree/main/W4/W4Act2)
 
 Ranks 20 countries by happiness, compares the lowest-scoring country's freedom score to
 the sample average, checks which factors correlate with happiness, and screens every
