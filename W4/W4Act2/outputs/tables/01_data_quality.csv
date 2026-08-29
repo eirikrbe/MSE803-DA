@@ -1,0 +1,9 @@
+column,dtype,non_null,missing,missing_pct,unique,example,unique_ratio,note,iqr_flagged,z_flagged
+Country,str,20,0,0.0,20,Norway,1.0,near-unique - likely an identifier,,
+Happiness_Score,float64,20,0,0.0,19,6.25,0.95,,0.0,0.0
+GDP_per_Capita,float64,20,0,0.0,18,1.39,0.9,,0.0,0.0
+Social_Support,float64,20,0,0.0,16,0.82,0.8,,0.0,0.0
+Healthy_Life_Expectancy,float64,20,0,0.0,19,81.6,0.95,,0.0,0.0
+Freedom_to_Make_Choices,float64,20,0,0.0,19,0.69,0.95,,0.0,0.0
+Generosity,float64,20,0,0.0,18,0.01,0.9,,0.0,0.0
+Perceptions_of_Corruption,float64,20,0,0.0,17,0.71,0.85,,0.0,0.0
