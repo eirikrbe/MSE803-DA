@@ -1,5 +1,9 @@
 from ucimlrepo import fetch_ucirepo 
 import pandas as pd
+from sklearn import datasets
+from sklearn.svm import SVC
+
+
   
 # fetch dataset 
 iris = fetch_ucirepo(id=53) 
@@ -10,6 +14,12 @@ y = iris.data.targets
 
 # combine features and targets into one dataframe to check duplicates
 df = pd.concat([X, y], axis=1)
+
+iris = datasets.load_iris()
+
+
+model = SVC(kernel='linear')
+model.fit(X_train, y_train)
 
 duplicates = df.duplicated()
 print(duplicates)

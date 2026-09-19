@@ -1,0 +1,32 @@
+# Pinned to the versions in the shared data_env (Python 3.14.3), so a fresh
+# install reproduces what the notebooks were executed against.
+#
+#   python3 -m venv data_env
+#   data_env/bin/pip install -r requirements.txt
+
+# --- core ---
+pandas==3.0.5
+numpy==2.5.1
+scipy==1.18.0
+scikit-learn==1.9.0
+
+# --- visualisation ---
+matplotlib==3.11.1
+seaborn==0.13.2
+plotly==6.9.0
+kaleido==1.3.0          # static image export for plotly
+
+# --- notebooks ---
+jupyterlab==4.6.2
+ipykernel==7.3.0
+
+# --- io ---
+openpyxl==3.1.5         # .xlsx input
+tabulate==0.9.0         # DataFrame.to_markdown(), used by save_table()
+
+# --- testing ---
+pytest==8.4.2           # optional: the tests also run standalone without it
+
+# --- optional, add only when a project actually needs it ---
+# ucimlrepo==0.0.7      # fetching UCI datasets
+# streamlit             # only when a real user needs an interactive app

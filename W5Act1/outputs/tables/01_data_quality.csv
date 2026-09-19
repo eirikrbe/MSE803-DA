@@ -1,0 +1,6 @@
+column,dtype,non_null,missing,missing_pct,unique,example,unique_ratio,note,iqr_flagged,z_flagged
+sepal length,float64,150,0,0.0,35,5.1,0.233,,0.0,0.0
+sepal width,float64,150,0,0.0,23,3.5,0.153,,4.0,1.0
+petal length,float64,150,0,0.0,43,1.4,0.287,,0.0,0.0
+petal width,float64,150,0,0.0,22,0.2,0.147,,0.0,0.0
+class,str,150,0,0.0,3,Iris-setosa,0.02,,,
