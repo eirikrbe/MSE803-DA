@@ -1,0 +1,16 @@
+result,chosen,same-day: first,row 64 = 12 Dec,keep row 94,drop row 45,64 + 94 + 45
+visits,69,69,70,69,69,70
+fish records,70,70,70,70,69,69
+December mean temperature (°C),18.11,18.08,18.23,18.14,18.11,18.26
+AV-3 warmest every month,True,True,True,True,True,True
+visits below saturation,69 of 69,69 of 69,70 of 70,69 of 69,69 of 69,70 of 70
+visits below 7 mg/L,12,12,12,11,12,11
+every site below 7 mg/L at least once,True,True,True,True,True,True
+"īnanga per survey, Oct / Nov / Dec",22.5 / 23.0 / 10.8,22.5 / 23.0 / 10.8,22.5 / 23.0 / 10.8,22.5 / 23.0 / 10.8,22.0 / 23.0 / 10.8,22.0 / 23.0 / 10.8
+H1 p (Holm),0.00013 *,0.00013 *,7.5e-05 *,9.7e-05 *,0.00013 *,5.6e-05 *
+H2 p (Holm),0.63,0.72,0.59,1,0.63,1
+H3 p (Holm),0.028 *,0.028 *,0.028 *,0.028 *,0.032 *,0.032 *
+H4 p (Holm),1,1,1,1,1,1
+H5 p (Holm),1,1,1,1,1,1
+H6 p (Holm),1,1,1,1,1,1
+same conclusions as chosen,True,True,True,True,True,True

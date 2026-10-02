@@ -1,0 +1,9 @@
+table,step,rows before,rows after,Excel rows
+water quality,drop verbatim copies,100,75,25 rows
+water quality,drop altered copies,75,71,"77, 79, 83, 98"
+water quality,drop invalid records,71,70,94
+water quality,one record per site-day (mean of same-day readings),70,69,"61, 64"
+fish,drop verbatim copies,90,74,16 rows
+fish,drop altered copies,74,71,"79, 82, 90"
+fish,drop invalid records,71,70,74
+fish,missing species: infer_by_size,70,70,45

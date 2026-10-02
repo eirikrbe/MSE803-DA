@@ -1,0 +1,6 @@
+column,dtype,non_null,missing,missing_pct,unique,example,unique_ratio,note,iqr_flagged,z_flagged
+Site ID,str,90,0,0.0,3,AV-1,0.033,,,
+Date,object,90,0,0.0,54,2023-11-06 00:00:00,0.6,,,
+Species,str,88,2,2.22,4,Brown Trout,0.044,,,
+Count,int64,90,0,0.0,29,12,0.322,,2.0,1.0
+Avg. Size (cm),float64,89,1,1.11,59,18.3,0.656,,0.0,0.0

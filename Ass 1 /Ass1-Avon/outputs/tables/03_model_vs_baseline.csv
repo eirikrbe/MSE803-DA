@@ -1,0 +1,4 @@
+species,n,LOOCV RMSE (linear),LOOCV RMSE (mean baseline),beats baseline
+Inanga,25,7.4307,7.1256,False
+Longfin Eel,15,4.8918,4.855,False
+Shortfin Eel,11,1.7817,1.6553,False
