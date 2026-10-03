@@ -29,7 +29,8 @@ The project structure follows the [MSE803 Analytics Template](../../MSE803-Analy
 - **Warming.** The river warmed about 3 °C from October to December (monthly means 15.0 → 16.6 → 18.1 °C).
   AV-3 was the warmest site every month, and the sites differ significantly in temperature (Holm p < 0.001).
 - **Oxygen.** All 69 visits were below saturation (66–98%). On 12 of them, spread across all three sites, oxygen
-  fell under 7 mg/L, the start of indicative NPS-FM band C.
+  fell under 7 mg/L, the start of indicative NPS-FM band C. AV-1's three were all in October; from 1 November,
+  when the NPS-FM summer window opens, only AV-2 and AV-3 fell below 7 mg/L.
 - **Īnanga.** Counts per survey of this threatened native fish halved in December (22.5 → 23.0 → 10.8;
   Holm p = 0.03, permutation p = 0.002).
 - **No detectable link** at these sample sizes between any species' count and oxygen, saturation, temperature
