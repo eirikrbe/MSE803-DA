@@ -1,0 +1,810 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avon River Dashboard</title>
+<meta name="description" content="Water quality and fish at three Avon River monitoring sites, October to December 2023.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Ako Kupu design system (style.css), light only by design. The UI tokens are copied verbatim.
+   Chart colours are hex because SVG attributes read them; the oxygen bands keep Figure C's colours. */
+:root {
+  color-scheme: light;
+  --paper: oklch(0.974 0.007 84); --paper-2: oklch(0.955 0.009 84); --surface: oklch(0.995 0.003 84);
+  --ink: oklch(0.265 0.013 70); --ink-soft: oklch(0.46 0.012 72); --ink-faint: oklch(0.62 0.010 75);
+  --line: oklch(0.90 0.010 80); --line-2: oklch(0.84 0.012 80);
+  --pounamu: oklch(0.525 0.072 168); --pounamu-d: oklch(0.44 0.070 168); --pounamu-t: oklch(0.92 0.035 168);
+  --kowhai: oklch(0.78 0.105 80); --kowhai-d: oklch(0.52 0.090 72); --kowhai-t: oklch(0.94 0.045 84);
+  --moana: oklch(0.60 0.058 222); --moana-t: oklch(0.93 0.028 222);
+  --whero: oklch(0.565 0.125 28); --whero-t: oklch(0.93 0.040 30);
+  --r-sm: 10px; --r-md: 16px; --r-lg: 24px;
+  --shadow-sm: 0 1px 2px oklch(0.4 0.02 70 / 0.04), 0 2px 6px oklch(0.4 0.02 70 / 0.05);
+  --shadow-md: 0 2px 4px oklch(0.4 0.02 70 / 0.04), 0 8px 24px oklch(0.4 0.02 70 / 0.07);
+  --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+
+  /* read by the charts */
+  --c-ink: #29241e; --c-soft: #5c5751; --c-faint: #8a8580; --c-line: #e1ddd7; --c-grid: #eeeae4;
+  --c-surface: #fefdfb; --c-accent: #3c7862; --c-context: #c6c1b8; --c-guide: #dcefe6; --c-low: #8c3a24;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.55;
+  -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+p { margin: 0; }
+button { font-family: var(--sans); }
+.app { max-width: 1440px; margin: 0 auto; padding: 18px 24px 28px; display: grid; gap: 14px; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.brandrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.mark { width: 42px; height: 42px; border-radius: 12px; background: var(--pounamu); color: #fff; display: grid;
+  place-items: center; box-shadow: var(--shadow-sm); flex: none; }
+.mark svg { width: 26px; height: 26px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--pounamu); }
+h1 { font-size: clamp(24px, 3.2vw, 32px); font-weight: 700; margin-top: 2px; text-wrap: balance; }
+.sub { margin-top: 4px; color: var(--ink-soft); font-size: 14.5px; max-width: 78ch; }
+.byline { margin-top: 2px; color: var(--ink-faint); font-size: 13px; }
+.segmented { display: flex; background: var(--paper-2); border-radius: 999px; padding: 4px; width: fit-content; max-width: 100%; }
+.segmented button { background: none; border: none; border-radius: 999px; padding: 8px 18px; font: 600 14px var(--sans);
+  color: var(--ink-soft); cursor: pointer; transition: .14s; white-space: nowrap; }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+.segmented.small button { padding: 6px 13px; font-size: 13px; }
+.sm { display: none; }
+.niho { height: 12px; background-image: linear-gradient(135deg, var(--pounamu) 25%, transparent 25%),
+  linear-gradient(225deg, var(--pounamu) 25%, transparent 25%); background-size: 20px 12px; opacity: .9; }
+
+/* layout and cards */
+main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+.mainc { position: relative; padding: 20px 22px 22px; min-width: 0; }
+.cardhead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 20px; margin-bottom: 14px; }
+.cardhead > div:first-child { min-width: 0; flex: 1 1 340px; }
+.ctitle { font-size: clamp(18px, 2vw, 21px); font-weight: 650; text-wrap: balance; }
+.csub { margin-top: 4px; color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+.panel { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.sectionlabel { margin: 4px 0 0; font: 700 12px/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.mainc .sectionlabel { margin: 22px 0 10px; }
+.note { font-size: 13.5px; color: var(--ink-soft); }
+.mainc > div > .note, .mainc .note { margin-top: 10px; }
+.attrib { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-faint); line-height: 1.5; }
+
+/* KPI tiles */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { display: grid; gap: 3px; align-content: start; padding: 12px 14px; border-radius: var(--r-md); background: var(--paper-2); min-width: 0; }
+.kpi-label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.kpi-value { font: 700 clamp(22px, 2.3vw, 30px)/1.05 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi-sub { font-size: 12px; color: var(--ink-faint); line-height: 1.35; }
+
+/* charts */
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.chart text { fill: var(--c-faint); font: 500 11px var(--sans); font-variant-numeric: tabular-nums; }
+.chart text.slab { fill: var(--c-ink); font: 700 15px var(--display); }
+.chart text.sstat { fill: var(--c-soft); font: 500 12.5px var(--sans); }
+.chart text.mlab { fill: var(--c-soft); font: 600 12px var(--sans); }
+.chart text.blab { fill: var(--c-soft); font: 700 11px var(--sans); }
+.chart text.val { fill: var(--c-ink); font: 600 12.5px var(--sans); }
+.chart text.val.hi { font-weight: 800; }
+.chart text.sp { fill: var(--c-ink); font: 700 15px var(--display); }
+.chart text.st { fill: var(--c-soft); font: 500 12px var(--sans); }
+.tip { position: absolute; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 9px 12px; font-size: 13.5px; line-height: 1.45;
+  box-shadow: var(--shadow-md); max-width: 290px; }
+.tip b { font-family: var(--display); font-weight: 700; font-size: 15px; }
+.tip .when { color: var(--ink-faint); font-size: 12.5px; }
+.hlnote { margin-top: 8px; font-size: 13.5px; color: var(--ink-soft); }
+.linkbtn { border: none; background: none; padding: 0; font: 600 13.5px var(--sans); color: var(--pounamu-d); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px; }
+
+/* river check grid and legend */
+.rgrid { display: grid; gap: 6px; align-items: center; }
+.gmonth { font-size: 12px; font-weight: 600; color: var(--ink-soft); text-align: center; }
+.gsite { font: 700 13px var(--display); padding-right: 4px; }
+.gtile { border: 2px solid transparent; border-radius: 10px; padding: 7px 8px 6px; cursor: pointer; display: grid; text-align: left;
+  font-family: var(--sans); transition: .14s; line-height: 1.15; }
+.gtile b { font: 700 19px var(--display); }
+.gtile span { font-size: 11.5px; font-variant-numeric: tabular-nums; opacity: .9; }
+.gtile:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.gtile.on { border-color: var(--ink); }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; }
+.legend li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 10px; padding-block: 6px;
+  border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.legend li:last-child { border-bottom: 0; }
+.legend .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid oklch(0.4 0.02 70 / .15); }
+.legend .lg-m { color: var(--ink-faint); font-size: 12.5px; }
+
+/* badges, chips and lists */
+.badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+  line-height: 1.25; }
+.k-crit { background: var(--whero-t); color: var(--whero); }
+.k-int { background: var(--kowhai-t); color: var(--kowhai-d); }
+.k-out { background: var(--moana-t); color: oklch(0.48 0.06 222); }
+.k-miss { background: var(--paper-2); color: var(--ink-soft); }
+.b-threat { background: var(--whero-t); color: var(--whero); }
+.b-risk { background: var(--kowhai-t); color: var(--kowhai-d); }
+.b-ok { background: var(--pounamu-t); color: var(--pounamu-d); }
+.b-intro { background: var(--paper-2); color: var(--ink-soft); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
+.dot.k-crit { background: var(--whero); } .dot.k-int { background: var(--kowhai-d); }
+.dot.k-out { background: var(--moana); } .dot.k-miss { background: var(--ink-faint); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 12px; }
+.chips button { display: inline-flex; align-items: center; font: 600 12.5px/1 var(--sans); color: var(--ink-soft);
+  background: var(--paper-2); border: 1.5px solid transparent; border-radius: 999px; padding: 8px 13px; cursor: pointer; transition: .14s; }
+.chips button:hover { border-color: var(--line-2); }
+.chips button[aria-pressed="true"] { background: var(--surface); border-color: var(--ink); color: var(--ink); }
+.matrix { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mx { width: 100%; display: grid; grid-template-columns: 168px 1fr; gap: 3px 14px; align-items: start; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; cursor: pointer;
+  font-family: var(--sans); color: var(--ink); transition: .14s; }
+.mx:hover { border-color: var(--line-2); box-shadow: var(--shadow-sm); }
+.mx.on { background: var(--pounamu-t); border-color: var(--pounamu); }
+.mx .badge { grid-row: span 2; justify-self: start; }
+.mxp { font: 600 15px/1.3 var(--display); }
+.mxd { font-size: 13px; color: var(--ink-soft); }
+.species { list-style: none; margin: 0; padding: 0; display: grid; }
+.species li { padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 5px; }
+.species li:last-child { border-bottom: 0; }
+.species li > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.species b { font: 700 15px var(--display); }
+.spmeta { font-size: 12.5px; color: var(--ink-faint); }
+
+/* validation flow */
+.flows { display: grid; gap: 16px; }
+.flowhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 13.5px; margin-bottom: 6px; }
+.flowhead b { font: 700 14.5px var(--display); }
+.flowhead span { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 16px; border-radius: 999px; overflow: hidden; gap: 2px; background: var(--surface); }
+.seg { display: block; min-width: 3px; }
+.s-kept { background: var(--pounamu); } .s-copy { background: #c9c2b6; } .s-alt { background: #8a8580; }
+.s-inv { background: #4d4842; } .s-merge { background: var(--kowhai); }
+.flowkey { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); }
+.flowkey li { display: inline-flex; align-items: center; gap: 6px; }
+.flowkey .sw { width: 10px; height: 10px; border-radius: 3px; }
+.flowkey b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.sel { display: grid; gap: 8px; padding: 14px 16px; border-radius: var(--r-md); background: var(--paper-2); }
+.sel .badge { justify-self: start; }
+.sel h3 { font-size: 17px; font-weight: 700; }
+.seldec { font-size: 13.5px; color: var(--ink-soft); }
+.cmp { display: grid; gap: 6px; padding: 10px 12px; background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--line); }
+.cmpm { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.cmpv { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.cmpv div { display: grid; }
+.cmpv div span { font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.cmpv b { font: 700 24px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.cmpv b.alt { color: var(--whero); }
+.cmpv .arrow { font-size: 20px; color: var(--ink-faint); padding-bottom: 2px; }
+
+/* findings rows */
+.prows { display: grid; }
+.prow { display: grid; grid-template-columns: minmax(200px, 1.25fr) minmax(170px, 1fr) 118px; gap: 4px 16px; align-items: center;
+  padding-block: 9px; border-bottom: 1px solid var(--line); }
+.prow.axis { border-bottom: 0; padding-block: 0; }
+.prow:last-child { border-bottom: 0; }
+.pl { font-size: 14px; line-height: 1.35; }
+.pl b { font-family: var(--display); margin-right: 6px; }
+.pl small { display: block; color: var(--ink-faint); font-size: 12px; margin-top: 2px; }
+.pv { display: grid; justify-items: start; gap: 3px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.pdot svg, .paxis svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pdot text, .paxis text { fill: var(--c-faint); font: 500 11px var(--sans); }
+.yes { background: var(--pounamu-t); color: var(--pounamu-d); }
+.no { background: var(--paper-2); color: var(--ink-soft); }
+.summary p { font-size: 13.5px; margin-top: 6px; }
+.summary ul { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-soft); }
+
+/* tables */
+details.datatable { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+details.datatable summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--pounamu-d); width: fit-content; }
+.tblwrap { overflow-x: auto; margin-top: 8px; }
+.tblwrap.scroll { max-height: 380px; overflow-y: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl th { position: sticky; top: 0; background: var(--surface); text-align: left; font-size: 11.5px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-faint); font-weight: 700; padding: 6px 10px 8px; vertical-align: bottom; }
+.tbl td { padding: 7px 10px; border-top: 1px solid var(--line); font-size: 13.5px; vertical-align: middle; }
+.tbl tr:hover td { background: var(--paper-2); }
+.tbl .r { text-align: right; }
+.tbl th.r { text-align: right; }
+.tbl small { color: var(--ink-faint); font-size: 11.5px; }
+.tbl td.chosen, .tbl th.chosen { background: var(--pounamu-t); }
+.tbl tr:hover td.chosen { background: var(--pounamu-t); }
+.tbl td.diff { background: var(--kowhai-t); font-weight: 600; }
+.tick { color: var(--pounamu-d); font-weight: 700; }
+.bandchip { display: inline-grid; place-items: center; width: 22px; height: 20px; border-radius: 5px; font-weight: 700; font-size: 12px; }
+
+button:focus-visible, summary:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--pounamu-t); }
+.segmented button:focus-visible { box-shadow: 0 0 0 3px var(--pounamu-t); }
+@media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr) 320px; } }
+@media (max-width: 880px) {
+  main { grid-template-columns: 1fr; }
+  .app { padding: 14px 16px 24px; }
+}
+@media (max-width: 600px) {
+  .mainc { padding: 16px 14px 18px; }
+  .panel { padding: 16px 14px; }
+  .segmented button { padding: 8px 12px; font-size: 13px; }
+  .lg { display: none; } .sm { display: inline; }
+  .mx { grid-template-columns: 1fr; }
+  .mx .badge { grid-row: auto; }
+  .prow { grid-template-columns: 1fr 104px; }
+  .prow .pdot, .prow .paxis { grid-column: 1 / -1; grid-row: 2; }
+  .prow.axis > span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brandrow">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12c2.6-4.3 7.6-5.6 12-2.6L19.5 6v12L15 14.6C10.6 17.6 5.6 16.3 3 12z"/><circle cx="8" cy="11.2" r=".7" fill="currentColor"/>
+        </svg>
+      </span>
+      <div>
+        <div class="eyebrow">Avon River monitoring</div>
+        <h1>Water quality and native fish</h1>
+        <p class="sub" id="subtitle"></p>
+        <p class="byline" id="byline"></p>
+      </div>
+    </div>
+    <nav class="segmented" id="views" aria-label="Dashboard view">
+      <button type="button" data-view="river" aria-pressed="true">River check</button>
+      <button type="button" data-view="fish" aria-pressed="false">Fish</button>
+      <button type="button" data-view="validation" aria-pressed="false"><span class="lg">Data validation</span><span class="sm">Validation</span></button>
+      <button type="button" data-view="findings" aria-pressed="false">Findings</button>
+    </nav>
+  </header>
+  <div class="niho" aria-hidden="true"></div>
+  <main>
+    <section class="card mainc" id="mainc" aria-live="polite">
+      <div id="mainbody"></div>
+      <div class="tip" id="tip" hidden></div>
+    </section>
+    <aside class="card panel" id="panel"></aside>
+  </main>
+</div>
+
+<script>
+window.DATA = {"meta":{"start":"2023-10-01","end":"2023-12-31","first":"2023-10-06","last":"2023-12-29","months":["2023-10","2023-11","2023-12"],"sites":["AV-1","AV-2","AV-3"],"summer_starts":"2023-11-01","bands":[{"band":"A","floor":8.0,"range":"≥ 8.0","meaning":"no stress","fill":"#d1e5f0","ink":"#2b2b2b"},{"band":"B","floor":7.0,"range":"7.0–8.0","meaning":"minor stress","fill":"#92c5de","ink":"#2b2b2b"},{"band":"C","floor":5.0,"range":"5.0–7.0","meaning":"moderate stress","fill":"#e07b5f","ink":"#2b2b2b"},{"band":"D","floor":null,"range":"< 5.0","meaning":"significant stress","fill":"#b2182b","ink":"#ffffff"}],"ph_guideline":[7.2,7.8],"byline":"Eric Gomez · October 2026"},"visits":[{"site":"AV-1","date":"2023-10-06","temp":13.9,"ph":7.22,"do":7.7,"sat":74.6,"band":"B","n":1,"rows":"52"},{"site":"AV-1","date":"2023-10-07","temp":14.2,"ph":7.23,"do":7.5,"sat":73.1,"band":"B","n":1,"rows":"48"},{"site":"AV-1","date":"2023-10-08","temp":13.8,"ph":7.28,"do":6.9,"sat":66.7,"band":"C","n":1,"rows":"44"},{"site":"AV-1","date":"2023-10-11","temp":13.7,"ph":7.1,"do":7.7,"sat":74.2,"band":"B","n":1,"rows":"15"},{"site":"AV-1","date":"2023-10-12","temp":13.6,"ph":7.26,"do":7.6,"sat":73.1,"band":"B","n":1,"rows":"26"},{"site":"AV-1","date":"2023-10-15","temp":13.9,"ph":7.11,"do":7.8,"sat":75.5,"band":"B","n":1,"rows":"9"},{"site":"AV-1","date":"2023-10-20","temp":14.5,"ph":7.18,"do":7.9,"sat":77.5,"band":"B","n":1,"rows":"41"},{"site":"AV-1","date":"2023-10-22","temp":13.4,"ph":7.08,"do":7.2,"sat":68.9,"band":"B","n":1,"rows":"19"},{"site":"AV-1","date":"2023-10-24","temp":14.0,"ph":7.09,"do":6.8,"sat":66.0,"band":"C","n":1,"rows":"50"},{"site":"AV-1","date":"2023-10-27","temp":14.3,"ph":7.15,"do":6.9,"sat":67.4,"band":"C","n":1,"rows":"29"},{"site":"AV-1","date":"2023-10-29","temp":14.1,"ph":7.32,"do":8.8,"sat":85.6,"band":"A","n":1,"rows":"23"},{"site":"AV-1","date":"2023-11-01","temp":14.0,"ph":7.05,"do":9.0,"sat":87.3,"band":"A","n":1,"rows":"6"},{"site":"AV-1","date":"2023-11-04","temp":16.0,"ph":7.29,"do":7.8,"sat":79.0,"band":"B","n":1,"rows":"33"},{"site":"AV-1","date":"2023-11-06","temp":13.5,"ph":7.88,"do":7.9,"sat":75.8,"band":"B","n":1,"rows":"3"},{"site":"AV-1","date":"2023-11-10","temp":14.8,"ph":7.36,"do":7.6,"sat":75.0,"band":"B","n":1,"rows":"37"},{"site":"AV-1","date":"2023-11-13","temp":16.2,"ph":7.5,"do":8.6,"sat":87.5,"band":"A","n":1,"rows":"12"},{"site":"AV-1","date":"2023-12-05","temp":18.9,"ph":7.59,"do":7.8,"sat":83.9,"band":"B","n":1,"rows":"56"},{"site":"AV-1","date":"2023-12-26","temp":19.4,"ph":7.64,"do":9.0,"sat":97.8,"band":"A","n":1,"rows":"65"},{"site":"AV-1","date":"2023-12-28","temp":15.6,"ph":7.68,"do":9.0,"sat":90.4,"band":"A","n":1,"rows":"62"},{"site":"AV-2","date":"2023-10-09","temp":14.9,"ph":7.55,"do":8.7,"sat":86.1,"band":"A","n":1,"rows":"35"},{"site":"AV-2","date":"2023-10-14","temp":15.3,"ph":7.64,"do":6.9,"sat":68.9,"band":"C","n":1,"rows":"7"},{"site":"AV-2","date":"2023-10-17","temp":15.9,"ph":7.38,"do":6.8,"sat":68.7,"band":"C","n":1,"rows":"18"},{"site":"AV-2","date":"2023-10-18","temp":16.3,"ph":7.71,"do":7.6,"sat":77.5,"band":"B","n":1,"rows":"14"},{"site":"AV-2","date":"2023-10-20","temp":15.4,"ph":7.66,"do":8.9,"sat":89.0,"band":"A","n":1,"rows":"16"},{"site":"AV-2","date":"2023-10-23","temp":15.0,"ph":7.68,"do":8.5,"sat":84.3,"band":"A","n":1,"rows":"25"},{"site":"AV-2","date":"2023-10-24","temp":15.6,"ph":7.58,"do":8.3,"sat":83.4,"band":"A","n":1,"rows":"45"},{"site":"AV-2","date":"2023-10-26","temp":15.8,"ph":7.62,"do":8.6,"sat":86.8,"band":"A","n":1,"rows":"32"},{"site":"AV-2","date":"2023-10-30","temp":15.1,"ph":7.69,"do":8.6,"sat":85.5,"band":"A","n":1,"rows":"22"},{"site":"AV-2","date":"2023-10-31","temp":14.6,"ph":7.41,"do":8.2,"sat":80.6,"band":"A","n":1,"rows":"30"},{"site":"AV-2","date":"2023-11-02","temp":16.8,"ph":7.33,"do":8.2,"sat":84.5,"band":"A","n":1,"rows":"4"},{"site":"AV-2","date":"2023-11-03","temp":16.6,"ph":7.74,"do":7.9,"sat":81.1,"band":"B","n":1,"rows":"21"},{"site":"AV-2","date":"2023-11-05","temp":15.2,"ph":7.53,"do":8.3,"sat":82.7,"band":"A","n":1,"rows":"28"},{"site":"AV-2","date":"2023-11-06","temp":15.5,"ph":7.63,"do":8.4,"sat":84.2,"band":"A","n":1,"rows":"38"},{"site":"AV-2","date":"2023-11-07","temp":15.3,"ph":7.6,"do":8.4,"sat":83.8,"band":"A","n":1,"rows":"51"},{"site":"AV-2","date":"2023-11-08","temp":15.7,"ph":7.65,"do":9.1,"sat":91.6,"band":"A","n":1,"rows":"11"},{"site":"AV-2","date":"2023-11-12","temp":16.1,"ph":7.67,"do":7.3,"sat":74.1,"band":"B","n":1,"rows":"40"},{"site":"AV-2","date":"2023-11-14","temp":16.0,"ph":7.56,"do":8.1,"sat":82.1,"band":"A","n":1,"rows":"42"},{"site":"AV-2","date":"2023-12-07","temp":20.7,"ph":7.37,"do":8.8,"sat":98.1,"band":"A","n":1,"rows":"54"},{"site":"AV-2","date":"2023-12-11","temp":16.0,"ph":7.04,"do":6.7,"sat":67.9,"band":"C","n":1,"rows":"67"},{"site":"AV-2","date":"2023-12-13","temp":17.9,"ph":7.12,"do":6.9,"sat":72.7,"band":"C","n":1,"rows":"59"},{"site":"AV-2","date":"2023-12-14","temp":16.3,"ph":7.68,"do":8.0,"sat":81.6,"band":"A","n":1,"rows":"55"},{"site":"AV-2","date":"2023-12-15","temp":18.6,"ph":7.67,"do":7.9,"sat":84.5,"band":"B","n":1,"rows":"66"},{"site":"AV-2","date":"2023-12-18","temp":15.5,"ph":7.67,"do":7.3,"sat":73.2,"band":"B","n":1,"rows":"71"},{"site":"AV-2","date":"2023-12-19","temp":18.7,"ph":7.39,"do":9.1,"sat":97.5,"band":"A","n":1,"rows":"58"},{"site":"AV-3","date":"2023-10-11","temp":13.2,"ph":7.38,"do":7.5,"sat":71.5,"band":"B","n":1,"rows":"31"},{"site":"AV-3","date":"2023-10-13","temp":16.4,"ph":7.44,"do":7.7,"sat":78.7,"band":"B","n":1,"rows":"46"},{"site":"AV-3","date":"2023-10-21","temp":15.1,"ph":7.6,"do":7.5,"sat":74.5,"band":"B","n":1,"rows":"5"},{"site":"AV-3","date":"2023-10-25","temp":14.5,"ph":7.49,"do":8.0,"sat":78.5,"band":"A","n":1,"rows":"13"},{"site":"AV-3","date":"2023-10-27","temp":17.1,"ph":7.45,"do":8.3,"sat":86.1,"band":"A","n":1,"rows":"20"},{"site":"AV-3","date":"2023-10-29","temp":16.5,"ph":7.51,"do":9.2,"sat":94.2,"band":"A","n":1,"rows":"49"},{"site":"AV-3","date":"2023-10-30","temp":16.7,"ph":7.59,"do":9.0,"sat":92.5,"band":"A","n":1,"rows":"27"},{"site":"AV-3","date":"2023-10-31","temp":17.3,"ph":7.5,"do":9.1,"sat":94.7,"band":"A","n":1,"rows":"39"},{"site":"AV-3","date":"2023-11-01","temp":17.2,"ph":7.34,"do":7.8,"sat":81.0,"band":"B","n":1,"rows":"43"},{"site":"AV-3","date":"2023-11-06","temp":18.2,"ph":7.39,"do":8.0,"sat":84.9,"band":"A","n":1,"rows":"53"},{"site":"AV-3","date":"2023-11-08","temp":18.0,"ph":7.31,"do":6.7,"sat":70.8,"band":"C","n":1,"rows":"36"},{"site":"AV-3","date":"2023-11-09","temp":18.3,"ph":7.41,"do":7.7,"sat":81.8,"band":"B","n":1,"rows":"24"},{"site":"AV-3","date":"2023-11-10","temp":17.9,"ph":7.22,"do":8.4,"sat":88.5,"band":"A","n":1,"rows":"8"},{"site":"AV-3","date":"2023-11-12","temp":18.6,"ph":7.33,"do":6.5,"sat":69.5,"band":"C","n":1,"rows":"10"},{"site":"AV-3","date":"2023-11-14","temp":19.2,"ph":7.36,"do":7.4,"sat":80.1,"band":"B","n":1,"rows":"17"},{"site":"AV-3","date":"2023-11-15","temp":19.7,"ph":7.42,"do":7.9,"sat":86.4,"band":"B","n":1,"rows":"34"},{"site":"AV-3","date":"2023-12-04","temp":20.1,"ph":7.39,"do":6.7,"sat":73.8,"band":"C","n":1,"rows":"68"},{"site":"AV-3","date":"2023-12-07","temp":20.5,"ph":7.655,"do":7.55,"sat":83.9,"band":"B","n":2,"rows":"61, 64"},{"site":"AV-3","date":"2023-12-15","temp":17.9,"ph":7.59,"do":7.4,"sat":78.0,"band":"B","n":1,"rows":"63"},{"site":"AV-3","date":"2023-12-19","temp":20.7,"ph":7.26,"do":7.2,"sat":80.3,"band":"B","n":1,"rows":"70"},{"site":"AV-3","date":"2023-12-20","temp":18.1,"ph":null,"do":7.1,"sat":75.2,"band":"B","n":1,"rows":"60"},{"site":"AV-3","date":"2023-12-22","temp":14.6,"ph":7.31,"do":6.9,"sat":67.8,"band":"C","n":1,"rows":"72"},{"site":"AV-3","date":"2023-12-23","temp":20.3,"ph":7.74,"do":7.2,"sat":79.7,"band":"B","n":1,"rows":"57"},{"site":"AV-3","date":"2023-12-24","temp":20.2,"ph":7.1,"do":8.6,"sat":95.0,"band":"A","n":1,"rows":"73"},{"site":"AV-3","date":"2023-12-29","temp":14.1,"ph":7.48,"do":6.9,"sat":67.1,"band":"C","n":1,"rows":"69"}],"river":{"visits":69,"below7":12,"below_sat":69,"sat_min":66,"sat_max":98,"month_temp":[{"month":"2023-10","mean":15.0},{"month":"2023-11","mean":16.6},{"month":"2023-12","mean":18.1}],"warming":3.1,"warmest_every_month":true,"warmest":"AV-3","sites":[{"site":"AV-1","visits":19,"temp_median":14.1,"temp_max":19.4,"do_min":6.8,"sat_min":66,"sat_median":76,"below7":3,"below7_summer":0,"ph_min":7.05,"ph_max":7.88},{"site":"AV-2","visits":25,"temp_median":15.8,"temp_max":20.7,"do_min":6.7,"sat_min":68,"sat_median":83,"below7":4,"below7_summer":2,"ph_min":7.04,"ph_max":7.74},{"site":"AV-3","visits":25,"temp_median":17.9,"temp_max":20.7,"do_min":6.5,"sat_min":67,"sat_median":80,"below7":5,"below7_summer":5,"ph_min":7.1,"ph_max":7.74}],"grid":[{"site":"AV-1","month":"2023-10","n":11,"do_min":6.8,"temp_med":13.9,"band":"C"},{"site":"AV-1","month":"2023-11","n":5,"do_min":7.6,"temp_med":14.8,"band":"B"},{"site":"AV-1","month":"2023-12","n":3,"do_min":7.8,"temp_med":18.9,"band":"B"},{"site":"AV-2","month":"2023-10","n":10,"do_min":6.8,"temp_med":15.35,"band":"C"},{"site":"AV-2","month":"2023-11","n":8,"do_min":7.3,"temp_med":15.85,"band":"B"},{"site":"AV-2","month":"2023-12","n":7,"do_min":6.7,"temp_med":17.9,"band":"C"},{"site":"AV-3","month":"2023-10","n":8,"do_min":7.5,"temp_med":16.45,"band":"B"},{"site":"AV-3","month":"2023-11","n":8,"do_min":6.5,"temp_med":18.25,"band":"C"},{"site":"AV-3","month":"2023-12","n":9,"do_min":6.7,"temp_med":20.1,"band":"C"}],"window_note":"AV-1's 3 readings below 7 mg/L were all in October, before the NPS-FM summer window opened on 1 November. From then on, only AV-2 (2) and AV-3 (5) fell below 7 mg/L.","titles":{"do":"Every site fell below 7 mg/L at least once","sat":"All 69 visits were below full saturation","temp":"The river warmed from 15.0 °C in October to 18.1 °C in December; AV-3 was warmest every month","ph":"pH ran 7.04–7.88: 10 readings below 7.2 and 1 above 7.8"}},"fish":{"records":70,"native":3,"species":[{"code":"Inanga","name":"Īnanga","origin":"native","status":"Threatened – Nationally Vulnerable","records":25,"size":7.7,"inferred":1},{"code":"Longfin Eel","name":"Longfin eel","origin":"native","status":"At Risk – Declining","records":15,"size":42.8,"inferred":0},{"code":"Shortfin Eel","name":"Shortfin eel","origin":"native","status":"Not Threatened","records":11,"size":40.3,"inferred":0},{"code":"Brown Trout","name":"Brown trout","origin":"introduced","status":"introduced","records":19,"size":17.9,"inferred":0}],"summary":{"all":[{"species":"Inanga","month":"2023-10","n":8,"total":180,"mean":22.5,"size":7.6},{"species":"Inanga","month":"2023-11","n":11,"total":253,"mean":23.0,"size":7.7},{"species":"Inanga","month":"2023-12","n":6,"total":65,"mean":10.8,"size":7.6},{"species":"Longfin Eel","month":"2023-10","n":7,"total":34,"mean":4.9,"size":42.6},{"species":"Longfin Eel","month":"2023-11","n":2,"total":11,"mean":5.5,"size":41.0},{"species":"Longfin Eel","month":"2023-12","n":6,"total":75,"mean":12.5,"size":43.7},{"species":"Shortfin Eel","month":"2023-10","n":7,"total":39,"mean":5.6,"size":40.1},{"species":"Shortfin Eel","month":"2023-11","n":3,"total":21,"mean":7.0,"size":40.9},{"species":"Shortfin Eel","month":"2023-12","n":1,"total":5,"mean":5.0,"size":39.6},{"species":"Brown Trout","month":"2023-10","n":7,"total":71,"mean":10.1,"size":17.9},{"species":"Brown Trout","month":"2023-11","n":5,"total":55,"mean":11.0,"size":18.5},{"species":"Brown Trout","month":"2023-12","n":7,"total":108,"mean":15.4,"size":17.6}],"AV-1":[{"species":"Inanga","month":"2023-10","n":2,"total":42,"mean":21.0,"size":7.3},{"species":"Inanga","month":"2023-11","n":3,"total":68,"mean":22.7,"size":7.7},{"species":"Inanga","month":"2023-12","n":1,"total":15,"mean":15.0,"size":6.9},{"species":"Longfin Eel","month":"2023-10","n":3,"total":15,"mean":5.0,"size":42.1},{"species":"Longfin Eel","month":"2023-11","n":1,"total":6,"mean":6.0,"size":38.9},{"species":"Longfin Eel","month":"2023-12","n":1,"total":10,"mean":10.0,"size":41.7},{"species":"Shortfin Eel","month":"2023-10","n":4,"total":19,"mean":4.8,"size":39.6},{"species":"Shortfin Eel","month":"2023-11","n":0,"total":0,"mean":null,"size":null},{"species":"Shortfin Eel","month":"2023-12","n":0,"total":0,"mean":null,"size":null},{"species":"Brown Trout","month":"2023-10","n":2,"total":23,"mean":11.5,"size":18.2},{"species":"Brown Trout","month":"2023-11","n":1,"total":12,"mean":12.0,"size":18.3},{"species":"Brown Trout","month":"2023-12","n":1,"total":3,"mean":3.0,"size":16.9}],"AV-2":[{"species":"Inanga","month":"2023-10","n":3,"total":62,"mean":20.7,"size":7.9},{"species":"Inanga","month":"2023-11","n":4,"total":81,"mean":20.2,"size":7.8},{"species":"Inanga","month":"2023-12","n":2,"total":9,"mean":4.5,"size":7.6},{"species":"Longfin Eel","month":"2023-10","n":2,"total":8,"mean":4.0,"size":42.8},{"species":"Longfin Eel","month":"2023-11","n":0,"total":0,"mean":null,"size":null},{"species":"Longfin Eel","month":"2023-12","n":3,"total":46,"mean":15.3,"size":44.8},{"species":"Shortfin Eel","month":"2023-10","n":2,"total":14,"mean":7.0,"size":40.4},{"species":"Shortfin Eel","month":"2023-11","n":2,"total":13,"mean":6.5,"size":41.2},{"species":"Shortfin Eel","month":"2023-12","n":0,"total":0,"mean":null,"size":null},{"species":"Brown Trout","month":"2023-10","n":3,"total":29,"mean":9.7,"size":17.8},{"species":"Brown Trout","month":"2023-11","n":2,"total":20,"mean":10.0,"size":18.8},{"species":"Brown Trout","month":"2023-12","n":2,"total":37,"mean":18.5,"size":19.0}],"AV-3":[{"species":"Inanga","month":"2023-10","n":3,"total":76,"mean":25.3,"size":7.5},{"species":"Inanga","month":"2023-11","n":4,"total":104,"mean":26.0,"size":7.6},{"species":"Inanga","month":"2023-12","n":3,"total":41,"mean":13.7,"size":7.8},{"species":"Longfin Eel","month":"2023-10","n":2,"total":11,"mean":5.5,"size":43.4},{"species":"Longfin Eel","month":"2023-11","n":1,"total":5,"mean":5.0,"size":43.2},{"species":"Longfin Eel","month":"2023-12","n":2,"total":19,"mean":9.5,"size":42.4},{"species":"Shortfin Eel","month":"2023-10","n":1,"total":6,"mean":6.0,"size":41.6},{"species":"Shortfin Eel","month":"2023-11","n":1,"total":8,"mean":8.0,"size":40.1},{"species":"Shortfin Eel","month":"2023-12","n":1,"total":5,"mean":5.0,"size":39.6},{"species":"Brown Trout","month":"2023-10","n":2,"total":19,"mean":9.5,"size":17.8},{"species":"Brown Trout","month":"2023-11","n":2,"total":23,"mean":11.5,"size":18.3},{"species":"Brown Trout","month":"2023-12","n":4,"total":68,"mean":17.0,"size":17.0}]},"inanga":[{"month":"2023-10","mean":22.5},{"month":"2023-11","mean":23.0},{"month":"2023-12","mean":10.8}],"titles":{"all":"Īnanga counts per survey halved in December, while trout and longfin eel counts rose","AV-1":"Fish counted per survey at AV-1","AV-2":"Fish counted per survey at AV-2","AV-3":"Fish counted per survey at AV-3"}},"validation":{"raw":190,"removed":50,"merged":1,"flow":[{"table":"water quality","before":100,"after":69,"parts":[{"step":"drop verbatim copies","n":25,"rows":"25 rows"},{"step":"drop altered copies","n":4,"rows":"77, 79, 83, 98"},{"step":"drop invalid records","n":1,"rows":"94"},{"step":"one record per site-day (mean of same-day readings)","n":1,"rows":"61, 64"}]},{"table":"fish","before":90,"after":70,"parts":[{"step":"drop verbatim copies","n":16,"rows":"16 rows"},{"step":"drop altered copies","n":3,"rows":"79, 82, 90"},{"step":"drop invalid records","n":1,"rows":"74"}]}],"classes":[{"name":"Critical anomaly","key":"crit","test":"The value is physically impossible.","action":"Remove the record; it cannot enter any analysis."},{"name":"Data-integrity error","key":"int","test":"The record is provably not an independent observation: a copy of a record above (verbatim or altered), or a date that does not exist.","action":"Remove it; where it copies a record, keep the source."},{"name":"Statistical outlier","key":"out","test":"Extreme by IQR or z-score, physically possible, and not provably an error.","action":"Keep, unless the record is suspect on other grounds; either way, test the alternative in the sensitivity analysis."},{"name":"Missing data","key":"miss","test":"A blank cell.","action":"Recover the value from a copy if one exists; infer it only if a single value fits, and flag it; otherwise leave it blank (no imputation)."}],"entries":[{"problem":"200.7 °C (WQ row 83)","class":"Critical anomaly","key":"crit","decision":"Remove: altered copy of row 70 (20.7 °C)","impact":"December mean temperature 18.1 → 23.0 °C","numbers":{"metric":"December mean temperature","before":"18.1","after":"23.0","unit":"°C","alternative":"If kept","more":false}},{"problem":"DO 79.9 mg/L (WQ row 79)","class":"Critical anomaly","key":"crit","decision":"Remove: altered copy of row 66 (7.9 mg/L)","impact":"AV-2's December mean DO 7.8 → 16.8 mg/L; the reading is 854% of saturation","numbers":{"metric":"AV-2's December mean DO","before":"7.8","after":"16.8","unit":"mg/L","alternative":"If kept","more":true}},{"problem":"Count 3000 (fish row 79)","class":"Data-integrity error","key":"int","decision":"Remove: altered copy of row 44 (count 3)","impact":"Shortfin eel mean count per survey 5.9 → 255.4","numbers":{"metric":"Shortfin eel mean count per survey","before":"5.9","after":"255.4","unit":"","alternative":"If kept","more":false}},{"problem":"1 longfin eel of 4.9 cm (fish row 90)","class":"Data-integrity error","key":"int","decision":"Remove: altered copy of row 55 (19 fish of 44.9 cm)","impact":"Longfin eel mean size 42.8 → 40.3 cm; the longfin size range would overlap īnanga's, so fish row 45's species could no longer be inferred","numbers":{"metric":"Longfin eel mean size","before":"42.8","after":"40.3","unit":"cm","alternative":"If kept","more":true}},{"problem":"Date 11/31/2023, 250 īnanga (fish row 74)","class":"Data-integrity error","key":"int","decision":"Remove: impossible date, no source row","impact":"Īnanga mean count per survey 19.9 → 28.8; with no valid date the record cannot be placed in a month or matched to a visit","numbers":{"metric":"Īnanga mean count per survey","before":"19.9","after":"28.8","unit":"","alternative":"If kept","more":true}},{"problem":"Other altered copies (WQ rows 77 and 98, fish row 82)","class":"Data-integrity error","key":"int","decision":"Remove: copies of rows 64, 30 and 22","impact":"Visits 69 → 70 and fish records 70 → 71: surveys that never happened, leaving 1 visit without a fish record and 1 fish record without a water reading","numbers":{"metric":"Visits","before":"69","after":"70","unit":"","alternative":"If kept","more":true}},{"problem":"41 verbatim copies (25 WQ rows, 16 fish rows)","class":"Data-integrity error","key":"int","decision":"Remove the copy; keep the first","impact":"Fish records 70 → 86, each copy counted as a new survey (īnanga per survey, Oct / Nov / Dec: 22.5 / 23.0 / 10.8 → 22.8 / 22.5 / 12.1); water copies merge into their visits, shifting the temperature of 1 visit where a copy is averaged in","numbers":{"metric":"Fish records","before":"70","after":"86","unit":"","alternative":"If kept","more":true}},{"problem":"DO 12.9 mg/L, 129% of saturation (WQ row 94)","class":"Statistical outlier","key":"out","decision":"Remove: no source row; conflicts with row 69 on the same day","impact":"Visits below 7 mg/L 12 → 11 (AV-3 on 29 Dec: 6.9 → 9.9 mg/L); both versions run in the sensitivity analysis","numbers":{"metric":"Visits below 7 mg/L","before":"12","after":"11","unit":"","alternative":"If kept","more":true}},{"problem":"Missing pH (WQ row 60) and size (fish row 68)","class":"Missing data","key":"miss","decision":"Leave blank; no imputation","impact":"pH summarised over 68 of 69 visits and size over 69 of 70 records; neither enters a hypothesis test","numbers":null},{"problem":"Missing species (fish row 45, copied at 80)","class":"Missing data","key":"miss","decision":"Infer īnanga from its size (8.1 cm) and flag it","impact":"Dropped instead: īnanga records 25 → 24, per survey Oct / Nov / Dec 22.5 / 23.0 / 10.8 → 22.0 / 23.0 / 10.8; both versions run in the sensitivity analysis","numbers":{"metric":"Īnanga records","before":"25","after":"24","unit":"","alternative":"If dropped","more":true}}],"title":"50 of 190 raw rows were copies, altered copies or invalid records"},"findings":{"tests":[{"id":"H1","claim":"Water temperature differs between sites","test":"Kruskal–Wallis H","value":21.512,"effect_name":"ε²","effect":0.296,"n":69,"p":2.1e-05,"p_holm":0.00013,"supported":true},{"id":"H2","claim":"Dissolved oxygen differs between sites","test":"Kruskal–Wallis H","value":3.692,"effect_name":"ε²","effect":0.026,"n":69,"p":0.16,"p_holm":0.63,"supported":false},{"id":"H3","claim":"Īnanga counts per survey differ between months","test":"Kruskal–Wallis H","value":10.365,"effect_name":"ε²","effect":0.38,"n":25,"p":0.0056,"p_holm":0.028,"supported":true},{"id":"H4","claim":"Īnanga counts are associated with oxygen saturation","test":"Spearman ρ","value":-0.163,"effect_name":"ρ","effect":-0.163,"n":25,"p":0.44,"p_holm":1.0,"supported":false},{"id":"H5","claim":"Longfin eel counts are associated with oxygen saturation","test":"Spearman ρ","value":0.196,"effect_name":"ρ","effect":0.196,"n":15,"p":0.48,"p_holm":1.0,"supported":false},{"id":"H6","claim":"Shortfin eel counts are associated with oxygen saturation","test":"Spearman ρ","value":0.273,"effect_name":"ρ","effect":0.273,"n":11,"p":0.42,"p_holm":1.0,"supported":false}],"permutation":{"p":0.0023,"shuffles":10000,"adjusted":0.011,"factor":5},"scenarios":[{"key":"chosen","label":"As cleaned"},{"key":"same-day: first","label":"Same-day readings: first, not mean"},{"key":"row 64 = 12 Dec","label":"Row 64 re-dated to 12 Dec"},{"key":"keep row 94","label":"Row 94 kept (DO 12.9 mg/L)"},{"key":"drop row 45","label":"Row 45 dropped, not inferred"},{"key":"64 + 94 + 45","label":"All three together"}],"sensitivity":[{"result":"visits","values":["69","69","70","69","69","70"]},{"result":"fish records","values":["70","70","70","70","69","69"]},{"result":"December mean temperature (°C)","values":["18.11","18.08","18.23","18.14","18.11","18.26"]},{"result":"AV-3 warmest every month","values":["True","True","True","True","True","True"]},{"result":"visits below saturation","values":["69 of 69","69 of 69","70 of 70","69 of 69","69 of 69","70 of 70"]},{"result":"visits below 7 mg/L","values":["12","12","12","11","12","11"]},{"result":"every site below 7 mg/L at least once","values":["True","True","True","True","True","True"]},{"result":"īnanga per survey, Oct / Nov / Dec","values":["22.5 / 23.0 / 10.8","22.5 / 23.0 / 10.8","22.5 / 23.0 / 10.8","22.5 / 23.0 / 10.8","22.0 / 23.0 / 10.8","22.0 / 23.0 / 10.8"]},{"result":"H1 p (Holm)","values":["0.00013 *","0.00013 *","7.5e-05 *","9.7e-05 *","0.00013 *","5.6e-05 *"]},{"result":"H2 p (Holm)","values":["0.63","0.72","0.59","1","0.63","1"]},{"result":"H3 p (Holm)","values":["0.028 *","0.028 *","0.028 *","0.028 *","0.032 *","0.032 *"]},{"result":"H4 p (Holm)","values":["1","1","1","1","1","1"]},{"result":"H5 p (Holm)","values":["1","1","1","1","1","1"]},{"result":"H6 p (Holm)","values":["1","1","1","1","1","1"]},{"result":"same conclusions as chosen","values":["True","True","True","True","True","True"]}],"changed":0,"alternatives":5,"models":[{"species":"Īnanga","n":25,"model":7.43,"baseline":7.13,"beats":false},{"species":"Longfin eel","n":15,"model":4.89,"baseline":4.86,"beats":false},{"species":"Shortfin eel","n":11,"model":1.78,"baseline":1.66,"beats":false}],"supported":2,"title":"2 of 6 hypotheses are supported, and no cleaning judgement changes that"}};
+</script>
+<script>
+(function () {
+  "use strict";
+  const D = window.DATA;
+  const $ = (id) => document.getElementById(id);
+  const css = getComputedStyle(document.documentElement);
+  const C = {};
+  ["ink", "soft", "faint", "line", "grid", "surface", "accent", "context", "guide", "low"].forEach((k) => {
+    C[k] = css.getPropertyValue("--c-" + k).trim();
+  });
+  const BAND = {};
+  D.meta.bands.forEach((b) => { BAND[b.band] = b; });
+  const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = (v, d) => (v == null ? "–" : (v < 0 ? "−" : "") + Math.abs(v).toFixed(d));
+  const pnum = (p) => (p < 0.001 ? "< 0.001" : String(Number(p.toPrecision(2))));
+  const pstr = (p) => (p < 0.001 ? "p < 0.001" : "p = " + pnum(p));
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  const DAY = 864e5;
+  const T0 = Date.parse(D.meta.start + "T00:00:00Z");
+  const SPAN = (Date.parse(D.meta.end + "T00:00:00Z") - T0) / DAY + 1;
+  const dayOf = (iso) => (Date.parse(iso + "T00:00:00Z") - T0) / DAY;
+  const asDate = (iso) => new Date(iso + "T00:00:00Z");
+  const monthName = (m, form) => asDate(m + "-01").toLocaleDateString("en-NZ", { month: form || "long", timeZone: "UTC" });
+  const dateLabel = (iso) => asDate(iso).toLocaleDateString("en-NZ", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+  const shortDate = (iso) => asDate(iso).toLocaleDateString("en-NZ", { day: "numeric", month: "short", timeZone: "UTC" });
+  const svgWrap = (W, H, inner, label) =>
+    `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${esc(label)}">${inner}</svg>`;
+
+  const state = { view: "river", measure: "do", site: "all", cls: "all", sel: 0, hl: null };
+  let redraw = () => {};
+
+  $("subtitle").textContent = `${D.river.visits} visits to three sites and ${D.fish.records} fish survey records, ` +
+    `${shortDate(D.meta.first)} – ${dateLabel(D.meta.last)}. Every record was validated before the analysis.`;
+  $("byline").textContent = D.meta.byline;
+
+  // ---------- shared pieces
+  const kpis = (items) => `<div class="kpis">${items.map(([label, value, sub]) =>
+    `<div class="kpi"><span class="kpi-label">${esc(label)}</span><span class="kpi-value">${esc(value)}</span>` +
+    `${sub ? `<span class="kpi-sub">${esc(sub)}</span>` : ""}</div>`).join("")}</div>`;
+  const segmented = (id, label, options, current) =>
+    `<div class="segmented small" id="${id}" role="group" aria-label="${esc(label)}">${options.map(([v, text]) =>
+      `<button type="button" data-v="${esc(v)}" aria-pressed="${v === current}">${esc(text)}</button>`).join("")}</div>`;
+  const wire = (id, fn) => $(id).querySelectorAll("button").forEach((b) => b.addEventListener("click", () => fn(b.dataset.v)));
+  const attribution = `<p class="attrib">Data: Avon River monitoring dataset (course platform), three sites, October–December
+    2023. The raw file is not published. Oxygen bands: NPS-FM 2020, Table 17 (Ministry for the Environment, 2020).
+    Student analysis for MSE803 Data Analytics.</p>`;
+
+  // ---------- tooltips: each chart registers points ({x, y}) or boxes ({x, y, w, h})
+  const tip = $("tip");
+  function attachTips(svg, hits, W) {
+    const find = (e) => {
+      const r = svg.getBoundingClientRect(), k = W / r.width;
+      const mx = (e.clientX - r.left) * k, my = (e.clientY - r.top) * k;
+      let best = null, bd = 18 * 18;
+      for (const h of hits) {
+        if (h.w != null) {
+          if (mx >= h.x && mx <= h.x + h.w && my >= h.y && my <= h.y + h.h) return h;
+          continue;
+        }
+        const d2 = (h.x - mx) ** 2 + (h.y - my) ** 2;
+        if (d2 < bd) { bd = d2; best = h; }
+      }
+      return best;
+    };
+    const show = (e) => {
+      const h = find(e);
+      if (!h) { tip.hidden = true; return; }
+      tip.innerHTML = h.html;
+      tip.hidden = false;
+      const host = $("mainc").getBoundingClientRect(), tw = tip.offsetWidth, th = tip.offsetHeight;
+      let x = e.clientX - host.left + 14, y = e.clientY - host.top - th - 12;
+      if (x + tw > host.width - 8) x = Math.max(8, e.clientX - host.left - tw - 14);
+      if (y < 8) y = e.clientY - host.top + 18;
+      tip.style.left = x + "px";
+      tip.style.top = y + "px";
+    };
+    svg.addEventListener("pointermove", show);
+    svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointerleave", () => { tip.hidden = true; });
+  }
+
+  // ---------- River check
+  const MEASURES = {
+    do: { tab: "Oxygen", label: "Dissolved oxygen", get: (v) => v.do, step: 1, refs: [5, 8], head: 0,
+      sub: "Each dot is one visit, in mg/L. The shading shows the indicative NPS-FM band a single reading falls in." },
+    sat: { tab: "Saturation", label: "Oxygen saturation", get: (v) => v.sat, step: 10, refs: [100], head: 4,
+      sub: "Oxygen as a share of what water at that temperature can hold. Warmer water holds less." },
+    temp: { tab: "Temperature", label: "Water temperature", get: (v) => v.temp, step: 2, refs: [], head: 0,
+      sub: "Each dot is one visit, in degrees Celsius." },
+    ph: { tab: "pH", label: "pH", get: (v) => v.ph, step: 0.2, refs: D.meta.ph_guideline, head: 0,
+      sub: `The shaded strip is the ${D.meta.ph_guideline.join("–")} default guideline range for New Zealand lowland rivers (ANZECC, 2000).` },
+  };
+  function domainOf(m) {
+    const vals = D.visits.map(m.get).filter((x) => x != null).concat(m.refs);
+    const lo = Math.floor(Math.min(...vals) / m.step + 1e-6) * m.step;
+    const hi = Math.ceil(Math.max(...vals) / m.step - 1e-6) * m.step;
+    return [Number(lo.toFixed(2)), Number(hi.toFixed(2))];
+  }
+  const visitTip = (v) => {
+    const b = BAND[v.band];
+    return `<b>${esc(v.site)}</b> · ${esc(dateLabel(v.date))}<br>` +
+      `Oxygen ${num(v.do, 1)} mg/L, band ${v.band} (${esc(b.meaning)})<br>` +
+      `Saturation ${num(v.sat, 0)}% · ${num(v.temp, 1)} °C · pH ${num(v.ph, 2)}<br>` +
+      `<span class="when">${v.n > 1 ? `Mean of ${v.n} readings, Excel rows ${esc(v.rows)}` : `Excel row ${esc(v.rows)}`}</span>`;
+  };
+
+  function drawRiver(host) {
+    const m = MEASURES[state.measure], [lo, top0] = domainOf(m), hi = top0 + m.head;
+    const W = Math.max(300, Math.round(host.clientWidth)), narrow = W < 560;
+    const L = narrow ? 30 : 40, R = narrow ? 18 : 24, T = 48, B = 24, SH = narrow ? 104 : 124, G = 42;
+    const sites = D.meta.sites, H = T + sites.length * SH + (sites.length - 1) * G + B;
+    const X = (d) => L + d / SPAN * (W - L - R);
+    const months = D.meta.months, bounds = months.map((mo) => dayOf(mo + "-01")).concat([SPAN]);
+    const hits = [];
+    let s = "";
+    months.forEach((mo, k) => {
+      s += `<text class="mlab" x="${X((bounds[k] + bounds[k + 1]) / 2)}" y="${H - 4}" text-anchor="middle">${esc(monthName(mo, narrow ? "short" : "long"))}</text>`;
+    });
+    sites.forEach((site, i) => {
+      const top = T + i * (SH + G), Y = (v) => top + (1 - (v - lo) / (hi - lo)) * SH;
+      if (state.measure === "do") {
+        let ceil = hi;
+        D.meta.bands.forEach((b) => {
+          const floor = b.floor == null ? -Infinity : b.floor, a = Math.min(ceil, hi), z = Math.max(floor, lo);
+          if (a > z) {
+            s += `<rect x="${L}" y="${Y(a)}" width="${W - L - R}" height="${Y(z) - Y(a)}" fill="${b.fill}" fill-opacity="${b.band === "C" ? 0.17 : 0.3}"/>`;
+            s += `<text class="blab" x="${W - R + 6}" y="${(Y(a) + Y(z)) / 2 + 4}">${b.band}</text>`;
+          }
+          ceil = Math.min(ceil, floor);
+        });
+      }
+      if (state.measure === "ph") {
+        const [g0, g1] = D.meta.ph_guideline;
+        s += `<rect x="${L}" y="${Y(g1)}" width="${W - L - R}" height="${Y(g0) - Y(g1)}" fill="${C.guide}"/>`;
+      }
+      for (let t = lo; t <= top0 + 1e-9; t += m.step) {
+        const v = Number(t.toFixed(2));
+        s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="${C.grid}"/>`;
+        s += `<text x="${L - 6}" y="${Y(v) + 3.5}" text-anchor="end">${num(v, m.step < 1 ? 1 : 0)}</text>`;
+      }
+      bounds.slice(1, -1).forEach((d) => { s += `<line x1="${X(d)}" x2="${X(d)}" y1="${top}" y2="${top + SH}" stroke="${C.line}"/>`; });
+      s += `<line x1="${L}" x2="${W - R}" y1="${top + SH}" y2="${top + SH}" stroke="${C.line}"/>`;
+      if (state.measure === "sat") {
+        s += `<line x1="${L}" x2="${W - R}" y1="${Y(100)}" y2="${Y(100)}" stroke="${C.soft}" stroke-dasharray="4 3"/>`;
+        if (i === 0) s += `<text x="${W - R - 4}" y="${Y(100) - 5}" text-anchor="end" style="fill:${C.soft}">full saturation</text>`;
+      }
+      if (state.measure === "ph" && i === 0) {
+        s += `<text x="${W - R - 4}" y="${Y(D.meta.ph_guideline[1]) - 5}" text-anchor="end" style="fill:${C.accent}">guideline ${D.meta.ph_guideline.join("–")}</text>`;
+      }
+      const st = D.river.sites.find((r) => r.site === site);
+      const stat = {
+        do: `${plural(st.visits, "visit")} · ${st.below7} below 7 mg/L`,
+        sat: `lowest ${st.sat_min}% · median ${st.sat_median}%`,
+        temp: `median ${num(st.temp_median, 1)} °C · highest ${num(st.temp_max, 1)} °C`,
+        ph: `${num(st.ph_min, 2)}–${num(st.ph_max, 2)}`,
+      }[state.measure];
+      s += `<text class="slab" x="${L}" y="${top - 10}">${esc(site)}</text>`;
+      s += `<text class="sstat" x="${L + 44}" y="${top - 10}">${esc(stat)}</text>`;
+      const P = D.visits.filter((v) => v.site === site && m.get(v) != null)
+        .sort((a, b) => (a.date < b.date ? -1 : 1))
+        .map((v) => ({ v, x: X(dayOf(v.date) + 0.5), y: Y(m.get(v)) }));
+      s += `<polyline points="${P.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}" fill="none" stroke="${C.context}" stroke-width="1.3"/>`;
+      P.forEach((p) => {
+        const v = p.v, dim = state.hl && !(state.hl.site === v.site && v.date.startsWith(state.hl.month));
+        const low = state.measure === "do" && (v.band === "C" || v.band === "D");
+        s += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${low ? 5.2 : 4.2}" fill="${low ? BAND[v.band].fill : C.soft}"` +
+          ` stroke="${low ? C.low : C.surface}" stroke-width="${low ? 1.3 : 1.5}"${dim ? ' opacity="0.2"' : ""}/>`;
+        hits.push({ x: p.x, y: p.y, html: visitTip(v) });
+      });
+    });
+    const sx = X(dayOf(D.meta.summer_starts));          // dashed inside each strip, so it never crosses a label
+    sites.forEach((_, i) => {
+      const top = T + i * (SH + G);
+      s += `<line x1="${sx}" x2="${sx}" y1="${top}" y2="${top + SH}" stroke="${C.soft}" stroke-dasharray="3 3"/>`;
+    });
+    s += `<line x1="${sx}" x2="${sx}" y1="${T - 37}" y2="${T - 23}" stroke="${C.soft}" stroke-dasharray="3 3"/>`;
+    s += `<text x="${sx + 6}" y="${T - 26}" style="fill:${C.soft}">${narrow ? "Summer window →" : "NPS-FM summer window opens 1 Nov →"}</text>`;
+    host.innerHTML = svgWrap(W, H, s, `${m.label} at each visit, by site`);
+    attachTips(host.querySelector("svg"), hits, W);
+  }
+
+  function visitTable() {
+    const rows = D.visits.slice().sort((a, b) => (a.date === b.date ? (a.site < b.site ? -1 : 1) : a.date < b.date ? -1 : 1));
+    return `<div class="tblwrap scroll"><table class="tbl"><thead><tr><th>Date</th><th>Site</th><th class="r">Oxygen (mg/L)</th>
+      <th>Band</th><th class="r">Saturation (%)</th><th class="r">Temp. (°C)</th><th class="r">pH</th><th>Excel rows</th></tr></thead><tbody>${
+      rows.map((v) => `<tr><td>${esc(shortDate(v.date))}</td><td>${esc(v.site)}</td><td class="r">${num(v.do, 1)}</td>` +
+        `<td><span class="bandchip" style="background:${BAND[v.band].fill};color:${BAND[v.band].ink}">${v.band}</span></td>` +
+        `<td class="r">${num(v.sat, 0)}</td><td class="r">${num(v.temp, 1)}</td><td class="r">${num(v.ph, 2)}</td><td>${esc(v.rows)}</td></tr>`).join("")}
+      </tbody></table></div>`;
+  }
+
+  function panelRiver() {
+    const R = D.river, mt = R.month_temp, months = D.meta.months;
+    const tiles = D.meta.sites.map((site) => `<span class="gsite">${esc(site)}</span>` + months.map((mo) => {
+      const g = R.grid.find((x) => x.site === site && x.month === mo), b = BAND[g.band];
+      const on = !!(state.hl && state.hl.site === site && state.hl.month === mo);
+      const label = `${site}, ${monthName(mo)}: lowest reading ${num(g.do_min, 1)} mg/L, band ${g.band} (${b.meaning}); ${plural(g.n, "visit")}`;
+      return `<button type="button" class="gtile${on ? " on" : ""}" data-site="${site}" data-month="${mo}" aria-pressed="${on}"` +
+        ` style="background:${b.fill};color:${b.ink}" title="${esc(label)}" aria-label="${esc(label)}"><b>${g.band}</b><span>${num(g.do_min, 1)} mg/L</span></button>`;
+    }).join("")).join("");
+    return kpis([
+      ["Visits", String(R.visits), `${D.meta.sites.length} sites, ${shortDate(D.meta.first)} – ${shortDate(D.meta.last)}`],
+      ["Below 7 mg/L", String(R.below7), `of ${R.visits} visits`],
+      ["Lowest saturation", `${R.sat_min}%`, R.below_sat === R.visits ? `all ${R.visits} visits below 100%` : `${R.below_sat} of ${R.visits} below 100%`],
+      ["Warming", `+${num(R.warming, 1)} °C`, `monthly mean ${num(mt[0].mean, 1)} → ${num(mt[mt.length - 1].mean, 1)} °C`],
+    ]) + `
+      <h2 class="sectionlabel">River check by month</h2>
+      <p class="note">The lowest oxygen reading at each site in each month, as an indicative band. Select a tile to pick out its visits.</p>
+      <div class="rgrid" style="grid-template-columns: auto repeat(${months.length}, 1fr)">
+        <span></span>${months.map((mo) => `<span class="gmonth">${esc(monthName(mo, "short"))}</span>`).join("")}${tiles}
+      </div>
+      <ul class="legend">${D.meta.bands.map((b) => `<li><span class="sw" style="background:${b.fill}"></span>` +
+        `<span><b>${b.band}</b> ${esc(b.range)} mg/L</span><span class="lg-m">${esc(b.meaning)}</span></li>`).join("")}</ul>
+      ${attribution}`;
+  }
+
+  function viewRiver() {
+    const m = MEASURES[state.measure];
+    $("mainbody").innerHTML = `
+      <div class="cardhead">
+        <div><h2 class="ctitle">${esc(D.river.titles[state.measure])}</h2><p class="csub">${esc(m.sub)}</p></div>
+        ${segmented("measure", "Measure", Object.entries(MEASURES).map(([k, v]) => [k, v.tab]), state.measure)}
+      </div>
+      <div class="chart" id="chart"></div>
+      ${state.hl ? `<p class="hlnote">Showing ${esc(state.hl.site)} in ${esc(monthName(state.hl.month))}.
+        <button type="button" class="linkbtn" id="clearhl">Show all visits</button></p>` : ""}
+      <p class="note"><strong>Indicative only.</strong> NPS-FM grades oxygen on the 7-day mean of daily minima over summer
+        (1 November–30 April). A daytime reading sits above that day's minimum, but one reading is not a 7-day mean, so a
+        band can be wrong in either direction.${D.river.window_note ? " " + esc(D.river.window_note) : ""}</p>
+      <details class="datatable"><summary>All ${D.visits.length} visits as a table</summary>${visitTable()}</details>`;
+    $("panel").innerHTML = panelRiver();
+    wire("measure", (v) => { state.measure = v; render(); });
+    $("panel").querySelectorAll(".gtile").forEach((b) => b.addEventListener("click", () => {
+      const same = state.hl && state.hl.site === b.dataset.site && state.hl.month === b.dataset.month;
+      state.hl = same ? null : { site: b.dataset.site, month: b.dataset.month };
+      render();
+    }));
+    if ($("clearhl")) $("clearhl").addEventListener("click", () => { state.hl = null; render(); });
+    redraw = () => drawRiver($("chart"));
+    redraw();
+  }
+
+  // ---------- Fish
+  const SPECIES = {};
+  D.fish.species.forEach((sp) => { SPECIES[sp.code] = sp; });
+  const statusClass = (s) => (/^Threatened/.test(s) ? "b-threat" : /^At Risk/.test(s) ? "b-risk" : /^Not Threatened/.test(s) ? "b-ok" : "b-intro");
+  const siteName = () => (state.site === "all" ? "All sites" : state.site);
+  const fishTip = (sp, r) => `<b>${esc(sp.name)}</b> · ${esc(monthName(r.month))} ${r.month.slice(0, 4)}<br>` +
+    `${num(r.mean, 1)} fish per survey (mean)<br>${plural(r.n, "survey")}, ${r.total} fish counted` +
+    `${r.size != null ? `<br>Mean size ${num(r.size, 1)} cm` : ""}<br><span class="when">${esc(siteName())}</span>`;
+
+  function drawFish(host) {
+    const rows = D.fish.summary[state.site], months = D.meta.months, species = D.fish.species;
+    const W = Math.max(300, Math.round(host.clientWidth)), cols = W < 620 ? 1 : 2, GX = 34, GY = 22;
+    const PW = (W - (cols - 1) * GX) / cols, HEAD = 62, PH = 150, FOOT = 38, CH = HEAD + PH + FOOT;
+    const nrows = Math.ceil(species.length / cols), H = nrows * CH + (nrows - 1) * GY;
+    const ymax = Math.max(5, Math.ceil(Math.max(...rows.map((r) => r.mean || 0)) / 5) * 5);
+    const tick = ymax > 20 ? 10 : 5, ticks = [];
+    for (let t = 0; t <= ymax; t += tick) ticks.push(t);
+    const hits = [];
+    let s = "";
+    species.forEach((sp, i) => {
+      const ox = (i % cols) * (PW + GX), oy = Math.floor(i / cols) * (CH + GY), hl = sp.code === "Inanga";
+      const base = oy + HEAD + PH, Y = (v) => base - v / ymax * PH;
+      s += `<text class="sp" x="${ox}" y="${oy + 16}">${esc(sp.name)}</text>`;
+      s += `<text class="st" x="${ox}" y="${oy + 33}">${esc(sp.origin === "native" ? `native · ${sp.status}` : "introduced")}</text>`;
+      ticks.forEach((t) => {
+        s += `<line x1="${ox}" x2="${ox + PW}" y1="${Y(t)}" y2="${Y(t)}" stroke="${t === 0 ? C.line : C.grid}"/>`;
+        if (t > 0) s += `<text x="${ox}" y="${Y(t) - 4}">${t}</text>`;
+      });
+      const slot = PW / months.length, bw = Math.min(64, slot * 0.56);
+      months.forEach((mo, k) => {
+        const r = rows.find((x) => x.species === sp.code && x.month === mo), cx = ox + slot * (k + 0.5);
+        if (r.n) {
+          s += `<rect x="${cx - bw / 2}" y="${Y(r.mean)}" width="${bw}" height="${base - Y(r.mean)}" rx="3" fill="${hl ? C.accent : C.context}"/>`;
+          s += `<text class="val${hl ? " hi" : ""}" x="${cx}" y="${Y(r.mean) - 6}" text-anchor="middle">${num(r.mean, 1)}</text>`;
+          hits.push({ x: cx - slot / 2, y: oy + HEAD - 10, w: slot, h: PH + 10, html: fishTip(sp, r) });
+        } else {
+          s += `<text x="${cx}" y="${base - 8}" text-anchor="middle">no survey</text>`;
+        }
+        s += `<text class="mlab" x="${cx}" y="${base + 16}" text-anchor="middle">${esc(monthName(mo, "short"))}</text>`;
+        s += `<text x="${cx}" y="${base + 31}" text-anchor="middle">${plural(r.n, "survey")}</text>`;
+      });
+    });
+    host.innerHTML = svgWrap(W, H, s, `Mean fish count per survey, by species and month: ${siteName()}`);
+    attachTips(host.querySelector("svg"), hits, W);
+  }
+
+  function fishTable() {
+    const rows = D.fish.summary[state.site];
+    return `<div class="tblwrap"><table class="tbl"><thead><tr><th>Species</th>${D.meta.months.map((m) =>
+      `<th class="r">${esc(monthName(m, "short"))}</th>`).join("")}</tr></thead><tbody>${D.fish.species.map((sp) =>
+      `<tr><td>${esc(sp.name)}</td>${D.meta.months.map((mo) => {
+        const r = rows.find((x) => x.species === sp.code && x.month === mo);
+        return `<td class="r">${r.n ? `${num(r.mean, 1)} <small>(${plural(r.n, "survey")}, ${r.total} fish)</small>` : "–"}</td>`;
+      }).join("")}</tr>`).join("")}</tbody></table></div>`;
+  }
+
+  function panelFish() {
+    const F = D.fish, ina = F.inanga, first = ina[0], last = ina[ina.length - 1];
+    const h3 = D.findings.tests.find((t) => t.id === "H3");
+    const links = D.findings.tests.filter((t) => ["H4", "H5", "H6"].includes(t.id));
+    const change = Math.round((last.mean / first.mean - 1) * 100);
+    return kpis([
+      ["Fish records", String(F.records), `${F.species.length} species, ${F.native} native`],
+      ["Īnanga per survey", `${change > 0 ? "+" : "−"}${Math.abs(change)}%`, `${num(first.mean, 1)} in ${monthName(first.month, "short")} → ${num(last.mean, 1)} in ${monthName(last.month, "short")}, all sites`],
+      ["Month difference", pnum(h3.p_holm), `Kruskal–Wallis p, Holm-adjusted (H3)`],
+      ["Linked to oxygen", `${links.filter((t) => t.supported).length} of ${links.length}`, "native species, Spearman ρ with saturation"],
+    ]) + `
+      <h2 class="sectionlabel">Species</h2>
+      <ul class="species">${F.species.map((sp) => `<li><div><b>${esc(sp.name)}</b>` +
+        `<span class="badge ${statusClass(sp.status)}">${esc(sp.origin === "native" ? sp.status : "Introduced")}</span></div>` +
+        `<span class="spmeta">${plural(sp.records, "record")} · mean size ${num(sp.size, 1)} cm` +
+        `${sp.inferred ? ` · ${sp.inferred} identified by size` : ""}</span></li>`).join("")}</ul>
+      <p class="note">Threat status from the 2023 national assessment (Dunn et al., 2025). Brown trout is introduced, and a
+        documented predator of native galaxiids such as īnanga (McDowall, 2006).</p>
+      ${attribution}`;
+  }
+
+  function viewFish() {
+    $("mainbody").innerHTML = `
+      <div class="cardhead">
+        <div><h2 class="ctitle">${esc(D.fish.titles[state.site])}</h2>
+          <p class="csub">Mean count per survey record, by month. The number of surveys behind each bar is under it.</p></div>
+        ${segmented("site", "Site", [["all", "All sites"]].concat(D.meta.sites.map((s) => [s, s])), state.site)}
+      </div>
+      <div class="chart" id="chart"></div>
+      <p class="note">Survey effort is not recorded, and month and temperature rose together, so these data cannot say why
+        counts changed.</p>
+      <details class="datatable"><summary>The numbers behind the bars</summary>${fishTable()}</details>`;
+    $("panel").innerHTML = panelFish();
+    wire("site", (v) => { state.site = v; render(); });
+    redraw = () => drawFish($("chart"));
+    redraw();
+  }
+
+  // ---------- Data validation
+  const STEPS = {
+    "drop verbatim copies": ["Verbatim copies", "copy"],
+    "drop altered copies": ["Altered copies", "alt"],
+    "drop invalid records": ["Invalid records", "inv"],
+  };
+  const stepOf = (step) => STEPS[step] || (/same-day|site-day/.test(step) ? ["Same-day readings merged", "merge"] : [step, "copy"]);
+  function flowHtml(f, widest) {
+    const fish = f.table === "fish";
+    const segs = [{ label: fish ? "Kept" : "Kept, as visits", n: f.after, cls: "kept" }]
+      .concat(f.parts.map((p) => { const [label, cls] = stepOf(p.step); return { label, cls, n: p.n, rows: p.rows }; }));
+    return `<div class="flow"><div class="flowhead"><b>${fish ? "Fish" : "Water quality"}</b>` +
+      `<span>${f.before} raw rows → ${f.after} ${fish ? "records" : "visits"}</span></div>` +
+      `<div class="bar" style="width:${(100 * f.before / widest).toFixed(1)}%">${segs.map((g) =>
+        `<span class="seg s-${g.cls}" style="flex:${g.n}" title="${esc(`${g.label}: ${g.n}${g.rows ? ` (Excel rows ${g.rows})` : ""}`)}"></span>`).join("")}</div>` +
+      `<ul class="flowkey">${segs.map((g) => `<li><span class="sw s-${g.cls}"></span>${esc(g.label)} <b>${g.n}</b></li>`).join("")}</ul></div>`;
+  }
+
+  function panelValidation() {
+    const V = D.validation, e = V.entries[state.sel], cls = V.classes.find((c) => c.name === e.class), n = e.numbers;
+    const unit = (x) => (n.unit ? `${x} ${n.unit}` : x);
+    return kpis([
+      ["Raw rows", String(V.raw), V.flow.map((f) => `${f.before} ${f.table === "fish" ? "fish" : "water quality"}`).join(", ")],
+      ["Removed", String(V.removed), `${Math.round(100 * V.removed / V.raw)}% of the raw rows`],
+      ["Visits", String(D.river.visits), "one per site and day"],
+      ["Fish records", String(D.fish.records), "after cleaning"],
+    ]) + `
+      <h2 class="sectionlabel">Selected problem</h2>
+      <div class="sel">
+        <span class="badge k-${e.key}">${esc(e.class)}</span>
+        <h3>${esc(e.problem)}</h3>
+        <p class="seldec">${esc(e.decision)}</p>
+        ${n ? `<div class="cmp"><span class="cmpm">${esc(n.metric)}</span><div class="cmpv">
+          <div><span>As cleaned</span><b>${esc(unit(n.before))}</b></div><span class="arrow" aria-hidden="true">→</span>
+          <div><span>${esc(n.alternative)}</span><b class="alt">${esc(unit(n.after))}</b></div></div></div>` : ""}
+        ${!n || n.more ? `<p class="note">${esc(e.impact)}.</p>` : ""}
+      </div>
+      <h2 class="sectionlabel">${esc(cls.name)}</h2>
+      <p class="note"><strong>Test.</strong> ${esc(cls.test)}</p>
+      <p class="note"><strong>Default action.</strong> ${esc(cls.action)}</p>
+      <p class="note">A record takes the first class that fits, in the order critical anomaly, data-integrity error,
+        statistical outlier, missing data.</p>
+      ${attribution}`;
+  }
+
+  function viewValidation() {
+    const V = D.validation, widest = Math.max(...V.flow.map((f) => f.before));
+    const shown = V.entries.map((e, i) => Object.assign({ i }, e)).filter((e) => state.cls === "all" || e.key === state.cls);
+    if (shown.length && !shown.some((e) => e.i === state.sel)) state.sel = shown[0].i;
+    $("mainbody").innerHTML = `
+      <div class="cardhead"><div><h2 class="ctitle">${esc(V.title)}</h2>
+        <p class="csub">Every problem is classified by evidence. Its impact is computed by re-running the cleaning with that
+          record kept. Select a problem to see it.</p></div></div>
+      <div class="flows">${V.flow.map((f) => flowHtml(f, widest)).join("")}</div>
+      <div class="chips" id="chips" role="group" aria-label="Classification">${[["all", "All"]].concat(V.classes.map((c) => [c.key, c.name]))
+        .map(([k, name]) => `<button type="button" data-v="${k}" aria-pressed="${state.cls === k}">` +
+          `${k === "all" ? "" : `<span class="dot k-${k}"></span>`}${esc(name)}</button>`).join("")}</div>
+      <ul class="matrix">${shown.map((e) => `<li><button type="button" class="mx${e.i === state.sel ? " on" : ""}" data-i="${e.i}"` +
+        ` aria-pressed="${e.i === state.sel}"><span class="badge k-${e.key}">${esc(e.class)}</span>` +
+        `<span class="mxp">${esc(e.problem)}</span><span class="mxd">${esc(e.decision)}</span></button></li>`).join("")}</ul>`;
+    $("panel").innerHTML = panelValidation();
+    wire("chips", (v) => { state.cls = v; render(); });
+    $("mainbody").querySelectorAll(".mx").forEach((b) => b.addEventListener("click", () => {
+      state.sel = +b.dataset.i;
+      $("mainbody").querySelectorAll(".mx").forEach((x) => {
+        const on = x === b;
+        x.classList.toggle("on", on);
+        x.setAttribute("aria-pressed", String(on));
+      });
+      $("panel").innerHTML = panelValidation();
+      if (window.matchMedia("(max-width: 880px)").matches) $("panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
+    redraw = () => {};
+  }
+
+  // ---------- Findings
+  const SENS_LABEL = { "same conclusions as chosen": "Same conclusions as the cleaned data" };
+  const sensCell = (v, isP) => {
+    if (v === "True") return { text: "✓", html: '<span class="tick" aria-label="yes">✓</span>' };
+    if (v === "False") return { text: "✗", html: '<span aria-label="no">✗</span>' };
+    const p = isP && /^([\d.eE+-]+)( \*)?$/.exec(v);
+    const text = p ? pnum(Number(p[1])) + (p[2] ? " *" : "") : v;
+    return { text, html: esc(text) };
+  };
+  function sensTable() {
+    const F = D.findings;
+    return `<table class="tbl"><thead><tr><th>Result</th>${F.scenarios.map((c, k) =>
+      `<th class="${k === 0 ? "chosen" : ""}">${esc(c.label)}</th>`).join("")}</tr></thead><tbody>${F.sensitivity.map((r) => {
+        const isP = /p \(Holm\)/.test(r.result), cells = r.values.map((v) => sensCell(v, isP));
+        const label = SENS_LABEL[r.result] || r.result[0].toUpperCase() + r.result.slice(1);
+        return `<tr><td>${esc(label)}</td>${cells.map((c, k) =>
+          `<td class="${k === 0 ? "chosen" : c.text !== cells[0].text ? "diff" : ""}">${c.html}</td>`).join("")}</tr>`;
+      }).join("")}</tbody></table>`;
+  }
+  function modelTable() {
+    return `<table class="tbl"><thead><tr><th>Species</th><th class="r">n</th><th class="r">Error, oxygen model</th>
+      <th class="r">Error, mean only</th><th>Beats the mean</th></tr></thead><tbody>${D.findings.models.map((m) =>
+      `<tr><td>${esc(m.species)}</td><td class="r">${m.n}</td><td class="r">${num(m.model, 2)}</td><td class="r">${num(m.baseline, 2)}</td>` +
+      `<td>${m.beats ? "Yes" : "No"}</td></tr>`).join("")}</tbody></table>`;
+  }
+
+  function drawP() {
+    const tests = D.findings.tests, lo = Math.floor(Math.log10(Math.min(...tests.map((t) => t.p))));
+    const scale = (W) => (p) => 8 + (Math.log10(Math.max(p, 10 ** lo)) - lo) / -lo * (W - 16);
+    document.querySelectorAll("#prows .pdot, #prows .paxis").forEach((cell) => {
+      const W = Math.max(150, Math.round(cell.clientWidth)), X = scale(W), axis = cell.classList.contains("paxis");
+      const H = axis ? 22 : 26, y = axis ? 0 : 13;
+      let s = "";
+      for (let e = lo; e <= 0; e++) {
+        const x = X(10 ** e);
+        if (!axis) s += `<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${C.grid}"/>`;
+        else if (e !== -1) s += `<text x="${x}" y="15" text-anchor="middle">${e === 0 ? "1" : (10 ** e).toFixed(-e)}</text>`;
+      }
+      const a = X(0.05);
+      if (axis) s += `<text x="${a}" y="15" text-anchor="middle" style="fill:${C.accent};font-weight:700">α = 0.05</text>`;
+      else {
+        const t = tests[+cell.dataset.i];
+        s += `<line x1="${a}" x2="${a}" y1="0" y2="${H}" stroke="${C.accent}" stroke-dasharray="3 3"/>`;
+        s += `<line x1="${X(t.p)}" x2="${X(t.p_holm)}" y1="${y}" y2="${y}" stroke="${C.context}" stroke-width="2"/>`;
+        s += `<circle cx="${X(t.p)}" cy="${y}" r="3.5" fill="${C.surface}" stroke="${C.faint}" stroke-width="1.3"><title>unadjusted p = ${pnum(t.p)}</title></circle>`;
+        s += `<circle cx="${X(t.p_holm)}" cy="${y}" r="6.5" fill="${t.supported ? C.accent : C.surface}" stroke="${t.supported ? C.accent : C.soft}" stroke-width="1.7"><title>Holm-adjusted p = ${pnum(t.p_holm)}</title></circle>`;
+      }
+      cell.innerHTML = svgWrap(W, H, s, axis ? "p-value scale, logarithmic, with α = 0.05 marked" : `${tests[+cell.dataset.i].id} p-values`);
+    });
+  }
+
+  function panelFindings() {
+    const F = D.findings, beat = F.models.filter((m) => m.beats).length;
+    const links = F.tests.filter((t) => ["H4", "H5", "H6"].includes(t.id)).map((t) => t.n);
+    return kpis([
+      ["Supported", `${F.supported} of ${F.tests.length}`, "hypotheses, Holm-adjusted"],
+      ["Conclusions changed", `${F.changed} of ${F.alternatives}`, "alternative versions of the cleaning"],
+      ["Models vs the mean", `${beat} of ${F.models.length}`, "beat it on leave-one-out error"],
+      ["Īnanga, permutation", pnum(F.permutation.p), `p from ${F.permutation.shuffles.toLocaleString("en-NZ")} shuffles (H3)`],
+    ]) + `
+      <h2 class="sectionlabel">Summary of findings</h2>
+      <div class="summary">
+        <p><b>Supported</b></p><ul>${F.tests.filter((t) => t.supported).map((t) => `<li>${esc(t.claim)} (${t.id})</li>`).join("")}</ul>
+        <p><b>Not supported at these sample sizes</b></p><ul>${F.tests.filter((t) => !t.supported).map((t) => `<li>${esc(t.claim)} (${t.id})</li>`).join("")}</ul>
+        <p><b>Not testable with these data</b></p><ul><li>Causes</li><li>Daily oxygen minima</li><li>Summer conditions</li>
+          <li>Abundance adjusted for survey effort</li></ul>
+      </div>
+      <p class="note">The p-values are approximate, because visits to one site repeat over time. At ${Math.min(...links)}–${Math.max(...links)}
+        records per species, only a large effect could have been detected.</p>
+      ${attribution}`;
+  }
+
+  function viewFindings() {
+    const F = D.findings;
+    $("mainbody").innerHTML = `
+      <div class="cardhead"><div><h2 class="ctitle">${esc(F.title)}</h2>
+        <p class="csub">Six hypotheses stated before testing: two-sided, α = 0.05, Holm-adjusted across all six. The large dot
+          is the adjusted p-value and the small one the unadjusted; filled means supported.</p></div></div>
+      <div class="prows" id="prows">
+        <div class="prow axis"><span></span><div class="paxis"></div><span></span></div>
+        ${F.tests.map((t, i) => `<div class="prow"><div class="pl"><b>${t.id}</b>${esc(t.claim)}<small>${esc(t.test)} = ${num(t.value, 2)}` +
+          `${t.test.endsWith(t.effect_name) ? "" : ` · ${esc(t.effect_name)} = ${num(t.effect, 2)}`} · n = ${t.n}</small></div>` +
+          `<div class="pdot" data-i="${i}"></div>` +
+          `<div class="pv"><span>${pstr(t.p_holm)}</span><span class="badge ${t.supported ? "yes" : "no"}">${t.supported ? "Supported" : "Not supported"}</span></div></div>`).join("")}
+      </div>
+      <p class="note">H3 re-checked without distributional assumptions: shuffling the month labels
+        ${F.permutation.shuffles.toLocaleString("en-NZ")} times gives p = ${pnum(F.permutation.p)}, or ${pnum(F.permutation.adjusted)}
+        after its Holm factor of ${F.permutation.factor}.</p>
+      <h2 class="sectionlabel">Sensitivity analysis: does any cleaning judgement change a conclusion?</h2>
+      <div class="tblwrap">${sensTable()}</div>
+      <p class="note">Each column re-runs the cleaning with one judgement call changed. Highlighted cells differ from the
+        cleaned data; * marks p &lt; 0.05 after the Holm adjustment.</p>
+      <h2 class="sectionlabel">Is a predictive model justified?</h2>
+      <div class="tblwrap">${modelTable()}</div>
+      <p class="note">Leave-one-out error (RMSE, fish per survey) of a straight line on oxygen saturation, against simply
+        predicting the mean. A model that does not beat the mean is not fitted.</p>`;
+    $("panel").innerHTML = panelFindings();
+    redraw = drawP;
+    redraw();
+  }
+
+  // ---------- switching views
+  const VIEWS = { river: viewRiver, fish: viewFish, validation: viewValidation, findings: viewFindings };
+  function render() {
+    document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+    tip.hidden = true;
+    VIEWS[state.view]();
+  }
+  document.querySelectorAll("#views button").forEach((b) => b.addEventListener("click", () => {
+    state.view = b.dataset.view;
+    try { history.replaceState(null, "", "#" + state.view); } catch (err) { /* file:// in some browsers */ }
+    render();
+  }));
+  const fromHash = location.hash.slice(1);
+  if (VIEWS[fromHash]) state.view = fromHash;
+  let lastW = 0;
+  new ResizeObserver(() => {
+    const w = $("mainc").clientWidth;
+    if (w !== lastW) { lastW = w; tip.hidden = true; redraw(); }
+  }).observe($("mainc"));
+  render();
+})();
+</script>
+</body>
+</html>

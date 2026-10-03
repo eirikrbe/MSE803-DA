@@ -15,7 +15,7 @@ count and mean size of four fish species. The analysis asks three things:
 |---|---|
 | [`01_data_understanding`](notebooks/Ass1-Avon_01_data_understanding.ipynb) | Profiles the raw file and validates it record by record. Each problem is classified as a critical anomaly, a data-integrity error, a statistical outlier or missing data. Every decision cites its Excel rows and the evidence behind it. |
 | [`02_eda`](notebooks/Ass1-Avon_02_eda.ipynb) | Applies the cleaning and derives oxygen saturation and an indicative NPS-FM band. Summarises every problem in a data validation and management matrix, with the computed impact of keeping each one. Describes the data and builds four figures. |
-| [`03_analysis`](notebooks/Ass1-Avon_03_analysis.ipynb) | Tests six hypotheses stated in advance (Holm-adjusted) and re-checks the closest result by permutation. Runs the sensitivity analysis across the cleaning judgement calls, and checks whether a predictive model beats the mean. |
+| [`03_analysis`](notebooks/Ass1-Avon_03_analysis.ipynb) | Tests six hypotheses stated in advance (Holm-adjusted) and re-checks the closest result by permutation. Runs the sensitivity analysis across the cleaning judgement calls, and checks whether a predictive model beats the mean. Builds the dashboard. |
 
 The reusable code (loading, quality checks, statistical tests, plotting) lives in `src/`, with standalone tests in `tests/`.
 The project structure follows the [MSE803 Analytics Template](../../MSE803-Analytics-Template/).
@@ -39,6 +39,21 @@ The project structure follows the [MSE803 Analytics Template](../../MSE803-Analy
 
 ![Īnanga counts per survey halved in December, while trout and longfin eel counts rose](outputs/figures/02_D_fish_by_month.png)
 
+## Dashboard
+
+[`outputs/dashboards/avon_river_dashboard.html`](outputs/dashboards/avon_river_dashboard.html) presents the results for
+the organisation's board and the public. It is a single self-contained file: download it and open it in a browser. It
+needs no server and loads no outside scripts. It has four views:
+- **River check:** every visit's oxygen, saturation, temperature and pH by site, against the indicative NPS-FM bands;
+- **Fish:** counts per survey by species, month and site;
+- **Data validation:** the four classifications, with the computed impact of keeping each record;
+- **Findings:** the six tests, the sensitivity analysis and the model check.
+
+Every number on the page is computed from `data/processed/` and `outputs/tables/`. The site locations are not in the
+data, so the dashboard has no map.
+
+![The River check view of the dashboard: every site fell below 7 mg/L at least once](outputs/dashboards/avon_river_dashboard_river.png)
+
 ## Data
 
 The raw spreadsheet was provided for coursework and is not included in this repository. It is
@@ -53,7 +68,8 @@ To re-run the analysis from scratch, place the raw file in `data/raw/`, then run
 ```bash
 pip install -r requirements.txt
 jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb
-python tests/test_cleaning.py      # also tests/test_quality.py and tests/test_models.py
+python tests/test_cleaning.py      # also test_quality.py, test_models.py and test_dashboard.py
+python -m src.visualization.dashboard --screenshot      # optional: the dashboard image above; needs Google Chrome
 ```
 
 ## Context
@@ -65,5 +81,5 @@ evidence for each part sits.
 |---|---|
 | 1-A Environmental challenges | `02`: findings, Figures A and B |
 | 1-B Analytical techniques | `03`: hypothesis tests, sensitivity analysis, model-versus-baseline check |
-| 1-C Tools and visualisations | `02`: Figures C and D, colour-blindness check |
+| 1-C Tools and visualisations | `02`: Figures C and D, colour-blindness check; the dashboard |
 | 1-D Recommendations | `02`: open questions for the data owner; `03`: summary of findings |
