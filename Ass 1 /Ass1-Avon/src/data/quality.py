@@ -3,7 +3,7 @@
 Every function here REPORTS. None of them mutates a frame or drops a row.
 Flagging a suspicious value is mechanical and safe to automate; deciding it is an
 error rather than a real observation is judgement, and belongs to you. See the
-DECISION cells in notebooks/01_data_understanding.ipynb.
+decision tables in notebooks/Ass1-Avon_01_data_understanding.ipynb.
 """
 
 import numpy as np

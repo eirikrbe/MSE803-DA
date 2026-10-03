@@ -6,7 +6,8 @@ Most datasets need something else, and many questions need no model at all.
 compare_models() reports metrics and stops. It has no `best` field and never
 picks a winner: choosing a model is a judgement about what the numbers mean for
 your question, and a function that returns 'the best model' hides exactly the
-decision you should be making. See the DECISION cell in 04_modeling.ipynb.
+decision you should be making. Ass1-Avon_03_analysis.ipynb uses it to decide
+whether any model is justified.
 """
 
 import numpy as np

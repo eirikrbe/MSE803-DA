@@ -1,40 +1,68 @@
-# Ass1-Avon: evidence for Assessment 1, Task 1 (Avon River)
+# Avon River water quality and fish, October–December 2023
 
-This project analyses the organisation's monitoring dataset for Task 1: three sites, October to December 2023. It
-establishes what the data can and cannot support before the written answers rely on it. It covers data
-cleaning, derived measures, pre-stated tests and the prototype figures for Task 1-C.
+Eric Gomez · October 2026
 
-- **Data:** `data/raw/Data_Set_Assignmnet_1 - 0426.xlsx`, from the course platform. It has two tables side by side
-  on one sheet (see notebook `01`).
-- **Notebooks:**
-  - `01_data_understanding`: layout, quality checks and the cleaning DECISIONs, cited by Excel row.
-  - `02_eda`: cleaning log, saturation, bands, summaries and Figures A–D.
-  - `03_analysis`: hypotheses H1–H6 (Holm-adjusted), a permutation re-check, a sensitivity table across the
-    cleaning judgement calls, and the model-versus-baseline check.
-  - `04_modeling` is unused, because DECISION 8 is "no".
-- **Outputs:** `outputs/figures/` (A temperature, B oxygen saturation, C river-check grid, D fish per survey by
-  species and month, plus the colour-blindness check), `outputs/tables/` (cleaning log, summaries, tests,
-  sensitivity) and `data/processed/` (`visits.csv`, `fish_records.csv`).
-- **Key results:**
-  - 100 → 69 visits and 90 → 70 fish records after cleaning. Every row below Excel row 73 is a copy, exact
-    or altered, or an invalid record.
-  - The river warmed about 3 °C (Oct → Dec), with AV-3 warmest.
-  - All 69 visits were below saturation, and 12 fell under 7 mg/L.
-  - Īnanga counts per survey halved in December (Holm p = 0.03; permutation p = 0.002).
-  - No count ~ water-quality association was found, and no model beats the mean.
-  - No alternative cleaning decision changes any of these conclusions (sensitivity table in `03`).
-- **Status:** every DECISION was confirmed on 3 Oct 2026. The decision log is at the bottom of `CHECKLIST.md`.
+This project analyses an environmental organisation's monitoring records from three sites on the Avon River
+(AV-1, AV-2 and AV-3). The records cover water temperature, pH and dissolved oxygen at each visit, and the
+count and mean size of four fish species. The analysis asks three things:
+- what the records show about the conditions native fish face;
+- whether fish numbers track water quality;
+- what the data cannot answer.
 
-> The MSE803-DA repository is public. Keep this folder out of any push until the assessment has been graded.
+## Approach
+
+| Notebook | What it does |
+|---|---|
+| [`01_data_understanding`](notebooks/Ass1-Avon_01_data_understanding.ipynb) | Profiles the raw file and validates it record by record. Each problem is classified as a critical anomaly, a data-integrity error, a statistical outlier or missing data. Every decision cites its Excel rows and the evidence behind it. |
+| [`02_eda`](notebooks/Ass1-Avon_02_eda.ipynb) | Applies the cleaning and derives oxygen saturation and an indicative NPS-FM band. Summarises every problem in a data validation and management matrix, with the computed impact of keeping each one. Describes the data and builds four figures. |
+| [`03_analysis`](notebooks/Ass1-Avon_03_analysis.ipynb) | Tests six hypotheses stated in advance (Holm-adjusted) and re-checks the closest result by permutation. Runs the sensitivity analysis across the cleaning judgement calls, and checks whether a predictive model beats the mean. |
+
+The reusable code (loading, quality checks, statistical tests, plotting) lives in `src/`, with standalone tests in `tests/`.
+The project structure follows the [MSE803 Analytics Template](../../MSE803-Analytics-Template/).
+
+## Key results
+
+- **Data quality.** 50 of 190 raw rows (26%) were copies, altered copies or invalid. Cleaning leaves 69 visits
+  and 70 fish records. Single bad records would have moved the headline numbers: kept, one would have lifted
+  December's mean temperature from 18.1 to 23.0 °C, and another would have taken shortfin eel from 5.9 to 255
+  fish per survey.
+- **Warming.** The river warmed about 3 °C from October to December (monthly means 15.0 → 16.6 → 18.1 °C).
+  AV-3 was the warmest site every month, and the sites differ significantly in temperature (Holm p < 0.001).
+- **Oxygen.** All 69 visits were below saturation (66–98%). On 12 of them, spread across all three sites, oxygen
+  fell under 7 mg/L, the start of indicative NPS-FM band C.
+- **Īnanga.** Counts per survey of this threatened native fish halved in December (22.5 → 23.0 → 10.8;
+  Holm p = 0.03, permutation p = 0.002).
+- **No detectable link** at these sample sizes between any species' count and oxygen, saturation, temperature
+  or pH. No model predicts counts better than the mean.
+- **Robust.** No alternative cleaning decision changes any of these conclusions.
+
+![Īnanga counts per survey halved in December, while trout and longfin eel counts rose](outputs/figures/02_D_fish_by_month.png)
+
+## Data
+
+The raw spreadsheet was provided for coursework and is not included in this repository. It is
+`Data_Set_Assignmnet_1 - 0426.xlsx`, a single sheet with a water-quality table and a fish table side by side.
+The cleaned tables are in `data/processed/` (`visits.csv`, `fish_records.csv`). Every figure and results
+table is in `outputs/`.
 
 ## Running it
 
+To re-run the analysis from scratch, place the raw file in `data/raw/`, then run the following from this folder:
+
 ```bash
-# from the MSE803-DA repo root (openpyxl is needed to read the .xlsx)
-data_env/bin/jupyter nbconvert --to notebook --execute --inplace \
-    "Ass 1 /Ass1-Avon/notebooks/Ass1-Avon_01_data_understanding.ipynb" \
-    "Ass 1 /Ass1-Avon/notebooks/Ass1-Avon_02_eda.ipynb" \
-    "Ass 1 /Ass1-Avon/notebooks/Ass1-Avon_03_analysis.ipynb"
+pip install -r requirements.txt
+jupyter nbconvert --to notebook --execute --inplace notebooks/*.ipynb
+python tests/test_cleaning.py      # also tests/test_quality.py and tests/test_models.py
 ```
 
-Built from `MSE803-Analytics-Template`. `CHECKLIST.md` describes the workflow.
+## Context
+
+This analysis was prepared for MSE803 Data Analytics, Assessment 1 (Task 1). The table shows where the
+evidence for each part sits.
+
+| Task | Evidence |
+|---|---|
+| 1-A Environmental challenges | `02`: findings, Figures A and B |
+| 1-B Analytical techniques | `03`: hypothesis tests, sensitivity analysis, model-versus-baseline check |
+| 1-C Tools and visualisations | `02`: Figures C and D, colour-blindness check |
+| 1-D Recommendations | `02`: open questions for the data owner; `03`: summary of findings |

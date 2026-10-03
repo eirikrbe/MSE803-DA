@@ -1,9 +1,9 @@
 """The presentation layer: getting a finding to its audience.
 
 A dashboard is not always the answer. Pick the format from who is reading and
-what they need to do with it -- the table below is reproduced in CHECKLIST.md.
+what they need to do with it:
 
-  Assessment, peer review, reproducibility  -> executed notebook + reports/*.md
+  Assessment, peer review, reproducibility  -> executed notebook
   A written finding, a report figure        -> static PNG (theme.save_fig)
   Reader explores the values themselves     -> Plotly HTML (plotly_dashboard)
   Stakeholder using Power BI / Tableau      -> flat extract (export_for_bi)
@@ -101,8 +101,8 @@ def plotly_dashboard(traces, title='', name='dashboard', height=750,
 def save_table(df, name, index=False):
     """Write a result table to outputs/tables/ as CSV, and print it as markdown.
 
-    The markdown goes straight into reports/ -- which is why a result you intend
-    to cite should come through here rather than being retyped.
+    A result you intend to cite should come through here rather than being
+    retyped.
     """
     TABLES.mkdir(parents=True, exist_ok=True)
     path = TABLES / (name if name.endswith('.csv') else f'{name}.csv')

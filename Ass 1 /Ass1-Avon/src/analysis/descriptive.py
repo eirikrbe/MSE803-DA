@@ -1,7 +1,7 @@
 """Descriptive summaries. Mechanical, and the honest first answer to most questions.
 
 A great many analytical questions are fully answered here, without a model. Reach
-for 04_modeling only once you can say what description could not tell you.
+for a model only once you can say what description could not tell you.
 """
 
 import numpy as np

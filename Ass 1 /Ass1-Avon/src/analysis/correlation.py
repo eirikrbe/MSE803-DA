@@ -33,7 +33,7 @@ def top_correlations_with(df, target, n=10, method='pearson', columns=None):
     direction: a variable can correlate strongly and be useless in a model
     (collinear with another, or a proxy for the target), and a weak correlate can
     matter once other variables are held constant. Choosing predictors is a
-    modelling decision -- see the DECISION cell in 04_modeling.
+    modelling decision -- see Ass1-Avon_03_analysis.ipynb, 'Is a predictive model justified?'.
     """
     numeric = df[columns] if columns is not None else df.select_dtypes(include=[np.number])
     if target not in numeric.columns:

@@ -6,8 +6,8 @@ was filled, with what, by which method, and how much to trust it.
 
 `method` has NO DEFAULT. Which imputation is appropriate depends on why the data
 is missing -- MCAR, MAR or MNAR -- and mean-filling MNAR data produces a complete
-table full of confident nonsense. Answer the missingness DECISION cell in
-01_data_understanding.ipynb before calling anything here.
+table full of confident nonsense. Establish the missingness mechanism (see
+Ass1-Avon_01_data_understanding.ipynb, 'Missing data') before calling anything here.
 """
 
 import numpy as np

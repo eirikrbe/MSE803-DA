@@ -6,7 +6,7 @@ sample size and what the question actually is, and getting it silently wrong is
 how an analysis produces a confident number that means nothing.
 
 Each docstring states the test's assumptions. Read them, choose, and record the
-reason in the DECISION cell in 03_analysis.ipynb.
+reason (see Ass1-Avon_03_analysis.ipynb, 'Test choice and assumptions').
 """
 
 import numpy as np
