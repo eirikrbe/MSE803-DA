@@ -12,9 +12,9 @@ cleaning, derived measures, pre-stated tests and the prototype figures for Task 
   - `03_analysis`: hypotheses H1–H6 (Holm-adjusted), a permutation re-check, a sensitivity table across the
     cleaning judgement calls, and the model-versus-baseline check.
   - `04_modeling` is unused, because DECISION 8 is "no".
-- **Outputs:** `outputs/figures/` (A temperature, B oxygen saturation, C river-check grid, D īnanga and temperature,
-  plus the colour-blindness check), `outputs/tables/` (cleaning log, summaries, tests, sensitivity) and `data/processed/`
-  (`visits.csv`, `fish_records.csv`).
+- **Outputs:** `outputs/figures/` (A temperature, B oxygen saturation, C river-check grid, D fish per survey by
+  species and month, plus the colour-blindness check), `outputs/tables/` (cleaning log, summaries, tests,
+  sensitivity) and `data/processed/` (`visits.csv`, `fish_records.csv`).
 - **Key results:**
   - 100 → 69 visits and 90 → 70 fish records after cleaning. Every row below Excel row 73 is a copy, exact
     or altered, or an invalid record.
