@@ -1,0 +1,7 @@
+id,hypothesis,statistic,value,effect size,effect,n,p,p (Holm),reject H0 at 0.05
+H1,temperature by site,Kruskal–Wallis H,21.512,ε²,0.296,69,2.1e-05,0.00013,True
+H2,DO by site,Kruskal–Wallis H,3.692,ε²,0.026,69,0.16,0.63,False
+H3,īnanga count by month,Kruskal–Wallis H,10.365,ε²,0.38,25,0.0056,0.028,True
+H4,inanga count ~ % saturation,Spearman ρ,-0.163,ρ,-0.163,25,0.44,1,False
+H5,longfin eel count ~ % saturation,Spearman ρ,0.196,ρ,0.196,15,0.48,1,False
+H6,shortfin eel count ~ % saturation,Spearman ρ,0.273,ρ,0.273,11,0.42,1,False

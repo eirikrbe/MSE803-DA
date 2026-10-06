@@ -1,0 +1,17 @@
+species,variable,n,rho,p (unadjusted)
+Brown trout,pct_sat,19,-0.31,0.196
+Brown trout,do_mg_l,19,-0.28,0.24
+Brown trout,temperature_c,19,0.05,0.842
+Brown trout,ph,19,-0.23,0.344
+Īnanga,pct_sat,25,-0.16,0.436
+Īnanga,do_mg_l,25,-0.05,0.81
+Īnanga,temperature_c,25,-0.21,0.306
+Īnanga,ph,25,-0.19,0.359
+Longfin eel,pct_sat,15,0.2,0.484
+Longfin eel,do_mg_l,15,0.08,0.769
+Longfin eel,temperature_c,15,0.46,0.082
+Longfin eel,ph,14,0.43,0.123
+Shortfin eel,pct_sat,11,0.27,0.417
+Shortfin eel,do_mg_l,11,0.17,0.624
+Shortfin eel,temperature_c,11,0.5,0.114
+Shortfin eel,ph,11,0.42,0.198

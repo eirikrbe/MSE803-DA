@@ -1,0 +1,6 @@
+Formula G1: =IF(C2<2.0, "setosa", IF(C2<=4.9, "versicolor", "virginica"))
+G4: =IF(A2<5.4, "setosa", IF(A2<=6.2, "versicolor", "virginica"))
+G5: =IF(B2>=3.2, "setosa", IF(B2<2.9, "versicolor", "virginica"))
+G6: =IF(D2<0.8, "setosa", IF(D2<=1.7, "versicolor", "virginica"))
+
+Given a dataset with multiple continuous features across distinct classes (such as the Iris dataset), how does the One-Way ANOVA F-statistic quantify the statistical separation power of individual features to predict Linear SVM classification performance, and why do features that strongly reject H_0 (high F-statistic) yield wider decision margins and fewer confusion matrix errors than features with low statistical significance?

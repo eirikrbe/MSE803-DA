@@ -1,0 +1,7 @@
+# Yoobee course material: kept out of the public repo
+MSE803-Assessment1.pdf
+Ass1-Avon/data/raw/*.xlsx
+
+# Regenerable intermediates (rebuilt by notebook 02)
+Ass1-Avon/data/interim/*
+!Ass1-Avon/data/interim/.gitkeep

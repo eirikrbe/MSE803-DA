@@ -1,0 +1,11 @@
+Value / Problem,Classification,Decision,Potential ecological & statistical impact
+200.7 °C (WQ row 83),Critical anomaly,Remove: altered copy of row 70 (20.7 °C),December mean temperature 18.1 → 23.0 °C
+DO 79.9 mg/L (WQ row 79),Critical anomaly,Remove: altered copy of row 66 (7.9 mg/L),AV-2's December mean DO 7.8 → 16.8 mg/L; the reading is 854% of saturation
+Count 3000 (fish row 79),Data-integrity error,Remove: altered copy of row 44 (count 3),Shortfin eel mean count per survey 5.9 → 255.4
+1 longfin eel of 4.9 cm (fish row 90),Data-integrity error,Remove: altered copy of row 55 (19 fish of 44.9 cm),"Longfin eel mean size 42.8 → 40.3 cm; the longfin size range would overlap īnanga's, so fish row 45's species could no longer be inferred"
+"Date 11/31/2023, 250 īnanga (fish row 74)",Data-integrity error,"Remove: impossible date, no source row",Īnanga mean count per survey 19.9 → 28.8; with no valid date the record cannot be placed in a month or matched to a visit
+"Other altered copies (WQ rows 77 and 98, fish row 82)",Data-integrity error,"Remove: copies of rows 64, 30 and 22","Visits 69 → 70 and fish records 70 → 71: surveys that never happened, leaving 1 visit without a fish record and 1 fish record without a water reading"
+"41 verbatim copies (25 WQ rows, 16 fish rows)",Data-integrity error,Remove the copy; keep the first,"Fish records 70 → 86, each copy counted as a new survey (īnanga per survey, Oct / Nov / Dec: 22.5 / 23.0 / 10.8 → 22.8 / 22.5 / 12.1); water copies merge into their visits, shifting the temperature of 1 visit where a copy is averaged in"
+"DO 12.9 mg/L, 129% of saturation (WQ row 94)",Statistical outlier,Remove: no source row; conflicts with row 69 on the same day,Visits below 7 mg/L 12 → 11 (AV-3 on 29 Dec: 6.9 → 9.9 mg/L); both versions run in the sensitivity analysis
+Missing pH (WQ row 60) and size (fish row 68),Missing data,Leave blank; no imputation,pH summarised over 68 of 69 visits and size over 69 of 70 records; neither enters a hypothesis test
+"Missing species (fish row 45, copied at 80)",Missing data,Infer īnanga from its size (8.1 cm) and flag it,"Dropped instead: īnanga records 25 → 24, per survey Oct / Nov / Dec 22.5 / 23.0 / 10.8 → 22.0 / 23.0 / 10.8; both versions run in the sensitivity analysis"

@@ -1,0 +1,6 @@
+column,dtype,non_null,missing,missing_pct,unique,example,unique_ratio,note,iqr_flagged,z_flagged
+Site ID,str,100,0,0.0,3,AV-1,0.03,,,
+Date,object,100,0,0.0,54,2023-11-06 00:00:00,0.54,,,
+Temperature (°C),float64,100,0,0.0,55,13.5,0.55,,1.0,1.0
+pH,float64,99,1,1.0,50,7.88,0.5,,0.0,0.0
+Dissolved Oxygen (mg/L),float64,99,1,1.0,28,7.9,0.28,,2.0,1.0
