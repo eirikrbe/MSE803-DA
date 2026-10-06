@@ -1,0 +1,4 @@
+pair,mean per survey,z,p,"p (Holm, 3 pairs)"
+Oct vs Nov,22.5 vs 23.0,-0.02,0.99,0.99
+Oct vs Dec,22.5 vs 10.8,2.78,0.0054,0.011
+Nov vs Dec,23.0 vs 10.8,2.98,0.0029,0.0087
