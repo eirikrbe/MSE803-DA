@@ -15,7 +15,7 @@ count and mean size of four fish species. The analysis asks three things:
 |---|---|
 | [`01_data_understanding`](notebooks/Ass1-Avon_01_data_understanding.ipynb) | Profiles the raw file and validates it record by record. Each problem is classified as a critical anomaly, a data-integrity error, a statistical outlier or missing data. Every decision cites its Excel rows and the evidence behind it. |
 | [`02_eda`](notebooks/Ass1-Avon_02_eda.ipynb) | Applies the cleaning and derives oxygen saturation and an indicative NPS-FM band. Summarises every problem in a data validation and management matrix, with the computed impact of keeping each one. Describes the data and builds four figures. |
-| [`03_analysis`](notebooks/Ass1-Avon_03_analysis.ipynb) | Tests six hypotheses stated in advance (Holm-adjusted) and re-checks the closest result by permutation. Runs the sensitivity analysis across the cleaning judgement calls, and checks whether a predictive model beats the mean. Builds the dashboard. |
+| [`03_analysis`](notebooks/Ass1-Avon_03_analysis.ipynb) | Tests six hypotheses stated in advance (Holm-adjusted), re-checks the closest result by permutation and locates it with a pairwise follow-up (Dunn's test). Runs the sensitivity analysis across the cleaning judgement calls, and checks whether a predictive model beats the mean. Builds the dashboard. |
 
 The reusable code (loading, quality checks, statistical tests, plotting) lives in `src/`, with standalone tests in `tests/`.
 The project structure follows the [MSE803 Analytics Template](../../MSE803-Analytics-Template/).
@@ -32,7 +32,8 @@ The project structure follows the [MSE803 Analytics Template](../../MSE803-Analy
   fell under 7 mg/L, the start of indicative NPS-FM band C. AV-1's three were all in October; from 1 November,
   when the NPS-FM summer window opens, only AV-2 and AV-3 fell below 7 mg/L.
 - **Īnanga.** Counts per survey of this threatened native fish halved in December (22.5 → 23.0 → 10.8;
-  Holm p = 0.03, permutation p = 0.002).
+  Holm p = 0.03, permutation p = 0.002). December was lower than both October and November (Dunn's test,
+  Holm p = 0.011 and 0.009).
 - **No detectable link** at these sample sizes between any species' count and oxygen, saturation, temperature
   or pH. No model predicts counts better than the mean.
 - **Robust.** No alternative cleaning decision changes any of these conclusions.
