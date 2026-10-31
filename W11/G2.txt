@@ -1,0 +1,23 @@
+Row 2 (Actual: Iris-setosa)
+	Cell H2 (Predicted Setosa):
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-setosa")
+	Cell I2 (Predicted Versicolor):
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-versicolor")
+	Cell J2 (Predicted Virginica):
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-virginica")
+
+Row 3 (Actual: Iris-versicolor)
+	Cell H3 (Predicted Setosa):
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-setosa")
+	Cell I3 (Predicted Versicolor):
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-versicolor")
+	Cell J3 (Predicted Virginica):
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-virginica")
+
+Row 4 (Actual: Iris-virginica)
+	Cell H4 (Predicted Setosa):
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-setosa")
+	Cell I4 (Predicted Versicolor):
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-versicolor")
+	Cell J4 (Predicted Virginica):
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-virginica")

@@ -1,0 +1,88 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from statsmodels.multivariate.manova import MANOVA
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+# ==========================================
+# 1. READ DIRECTLY FROM EXCEL & CLEAN DATA
+# ==========================================
+df = pd.read_excel('Group_2_MANOVA.xlsx', sheet_name='Sheet1')
+df.columns = df.columns.str.strip()
+df_clean = df.dropna(subset=['SL', 'SW', 'PL', 'PW', 'Species']).copy()
+
+# ==========================================
+# 2. RUN GROUP 2 MANOVA
+# ==========================================
+ma = MANOVA.from_formula('SL + SW + PL + PW ~ Species', data=df_clean)
+print("=== GROUP 2 MANOVA RESULTS ===")
+print(ma.mv_test().summary())
+
+# ==========================================
+# 3. TRAIN 4-FEATURE SVM & PREDICT
+# ==========================================
+X = df_clean[['SL', 'SW', 'PL', 'PW']]
+y = df_clean['Species']
+
+svm_model = SVC(kernel='linear', C=1.0)
+svm_model.fit(X, y)
+df_clean['Predicted_Species'] = svm_model.predict(X)
+
+acc = accuracy_score(y, df_clean['Predicted_Species'])
+print(f"\nGroup 2 Multivariate SVM Accuracy: {acc * 100:.2f}%")
+
+# ==========================================
+# 4. GENERATE 3-PANEL DIAGNOSTIC PLOTS
+# (Confusion Matrix, Sepal View, Petal View)
+# ==========================================
+fig, axes = plt.subplots(1, 3, figsize=(18, 5))
+
+# Panel A: Confusion Matrix Heatmap
+cm = confusion_matrix(df_clean['Species'], df_clean['Predicted_Species'])
+species_labels = sorted(df_clean['Species'].unique())
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', cbar=False,
+            xticklabels=species_labels, yticklabels=species_labels, ax=axes[0])
+axes[0].set_title(f'Confusion Matrix ({acc * 100:.2f}% Accuracy)')
+axes[0].set_xlabel('Predicted Species')
+axes[0].set_ylabel('Actual Species')
+
+# Panel B: Sepal View (SL vs SW)
+sns.scatterplot(data=df_clean, x='SL', y='SW', hue='Species', 
+                style='Predicted_Species', palette='Set1', s=70, ax=axes[1])
+axes[1].set_title('Sepal View: SL vs SW')
+axes[1].set_xlabel('Sepal Length (SL)')
+axes[1].set_ylabel('Sepal Width (SW)')
+axes[1].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+
+# Panel C: Petal View (PL vs PW)
+sns.scatterplot(data=df_clean, x='PL', y='PW', hue='Species', 
+                style='Predicted_Species', palette='Set1', s=70, ax=axes[2])
+axes[2].set_title('Petal View: PL vs PW')
+axes[2].set_xlabel('Petal Length (PL)')
+axes[2].set_ylabel('Petal Width (PW)')
+axes[2].legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+
+plt.tight_layout()
+plt.show()
+
+# ==========================================
+# 5. GENERATE ALL-FEATURES PAIRPLOT GRID
+# ==========================================
+print("\nGenerating All-Features Pairplot Grid (SL, SW, PL, PW)...")
+g = sns.pairplot(
+    df_clean, 
+    vars=['SL', 'SW', 'PL', 'PW'], 
+    hue='Species', 
+    palette='Set1', 
+    diag_kind='kde',
+    markers=["o", "s", "D"]
+)
+g.fig.suptitle("All-Features Comparative Pairplot (SL, SW, PL, PW)", y=1.02, fontsize=14)
+plt.show()
+
+# ==========================================
+# 6. SAVE RESULTS BACK TO EXCEL
+# ==========================================
+df_clean.to_excel('Group_2_Python_Results.xlsx', index=False)
+print("\nSuccess! Results saved directly to 'Group_2_Python_Results.xlsx'.")
