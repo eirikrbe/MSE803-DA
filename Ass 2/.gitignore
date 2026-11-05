@@ -1,0 +1,12 @@
+# Yoobee course material: kept out of the public repo
+MSE803-Assessment2.pdf
+Ass2-Fitness/data/raw/*.csv
+
+# Row-level user records stay local, even though this course dataset is synthetic.
+# The project's own privacy guideline (G6 in notebook 05) publishes aggregates only,
+# so the public repo carries outputs/tables and figures, never the cleaned user rows.
+Ass2-Fitness/data/processed/*.csv
+
+# Regenerable intermediates (rebuilt by notebook 02)
+Ass2-Fitness/data/interim/*
+!Ass2-Fitness/data/interim/.gitkeep

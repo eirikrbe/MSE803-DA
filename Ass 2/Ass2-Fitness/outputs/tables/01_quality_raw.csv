@@ -1,0 +1,9 @@
+column,dtype,non_null,missing,missing_pct,unique,example,unique_ratio,note,iqr_flagged,z_flagged
+User ID,int64,5299,0,0.0,5299,1,1.0,,0.0,0.0
+Gender,str,5299,0,0.0,2,Female,0.0,,,
+Age,int64,5299,0,0.0,42,22,0.008,,0.0,0.0
+Activity Level,str,5299,0,0.0,3,Active,0.001,,,
+Location,str,5299,0,0.0,3,Suburban,0.001,,,
+App Sessions,float64,5298,1,0.02,150,151.0,0.028,,0.0,0.0
+Distance Travelled (km),float64,5298,1,0.02,171,140.0,0.032,,1.0,1.0
+Calories Burned,int64,5299,0,0.0,800,728,0.151,,4.0,0.0

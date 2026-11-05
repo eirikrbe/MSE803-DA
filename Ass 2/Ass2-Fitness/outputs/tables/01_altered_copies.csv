@@ -1,0 +1,28 @@
+user_id,source_id,fields_matching,changed,source_value,copy_value
+5010,3816,6 of 7,App Sessions,110,100
+5018,3824,5 of 7,"Gender, App Sessions",Male; 100,Female; 90
+5166,3724,6 of 7,Gender,Female,Male
+5168,3726,6 of 7,Gender,Female,Male
+5172,3730,6 of 7,Gender,Female,Male
+5174,3732,6 of 7,Gender,Female,Male
+5177,3735,6 of 7,Gender,Female,Male
+5178,3736,6 of 7,Gender,Female,Male
+5179,3737,6 of 7,Gender,Female,Male
+5180,3738,6 of 7,Gender,Female,Male
+5181,3739,6 of 7,Gender,Female,Male
+5182,3740,6 of 7,Gender,Female,Male
+5184,3742,6 of 7,Gender,Female,Male
+5188,3746,6 of 7,Gender,Female,Male
+5192,3750,5 of 7,"Gender, Location",Female; Suburban,Male; Urban
+5194,3752,5 of 7,"Gender, Location",Female; Suburban,Male; Urban
+5196,3754,6 of 7,Gender,Female,Male
+5197,3755,6 of 7,Location,Rural,Urban
+5198,3756,6 of 7,Location,Rural,Urban
+5259,3817,5 of 7,"Location, App Sessions",Rural; 95,Suburban; blank
+5260,3818,6 of 7,Location,Rural,Suburban
+5262,3820,6 of 7,Location,Urban,Suburban
+5263,3821,6 of 7,Location,Urban,Suburban
+5265,3823,6 of 7,Location,Rural,Suburban
+5267,3825,6 of 7,Location,Rural,Suburban
+5269,3827,6 of 7,Location,Urban,Suburban
+5279,3837,6 of 7,Calories Burned,132,332

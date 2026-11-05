@@ -110,11 +110,15 @@ test. Logic specific to one dataset's quirks legitimately stays in the notebook.
 | `data/cleaning.py` | `clean_number`, `text_to_number`, `snake_case_columns`, `standardize_category`, `coerce_types`, `strip_whitespace`, `drop_exact_duplicates` |
 | `analysis/descriptive.py` | `describe_numeric`, `describe_categorical`, `group_compare` |
 | `analysis/correlation.py` | `correlation_matrix`, `top_correlations_with` |
-| `analysis/hypothesis.py` | `compare_groups` (requires `test=`), `chi2_independence`, `permutation_test`, `cohens_d` |
+| `analysis/hypothesis.py` | `compare_groups` (requires `test=`), `chi2_independence`, `permutation_test`, `cohens_d`; effect sizes `cramers_v`, `epsilon_squared`, `rank_biserial`, `spearman_ci`; `holm_adjust`; `bootstrap_effect_ci`, `bootstrap_rows_ci` |
 | `visualization/theme.py` | `PALETTE`, `set_plot_style`, `save_fig`, `highlight` |
 | `visualization/plots.py` | `missingness_matrix`, `correlation_heatmap`, `distribution_grid`, `ranked_bar`, `correlation_bars`, `category_counts`, `scatter_with_fit` |
 | `visualization/presentation.py` | `build_dashboard`, `plotly_dashboard`, `save_table`, `export_for_bi` |
 | `models/baseline.py` | Univariate regression + LOOCV. `compare_models` reports and never picks a winner |
+| `models/evaluation.py` | `regression_metrics`, `classification_metrics` (macro precision/recall/F1, ROC-AUC), `per_class_report`, `normalised_confusion`, `bootstrap_ci`, `cv_table` (requires `cv=` and `scoring=`, returns no winner), `mcnemar`, `interval_coverage` |
+| `models/clustering.py` | `hopkins` (clustering tendency), `kmeans_sweep` (inertia, silhouette, Davies–Bouldin, Calinski–Harabasz; chooses no k), `bootstrap_stability` (ARI) |
+| `ethics/privacy.py` | `equivalence_class_sizes`, `k_anonymity_report` (quasi-identifiers passed explicitly), `laplace_mean`, `dp_error` |
+| `ethics/fairness.py` | `group_metric_table` (per-group metric with bootstrap CI and n), `disparity_summary`; sets no threshold |
 | `models/imputation.py` | `impute` (requires `method=`), `write_provenance_artifacts` |
 
 ## Presentation layer
@@ -147,6 +151,9 @@ asserts and a standalone runner:
 data_env/bin/python3 tests/test_cleaning.py
 data_env/bin/python3 tests/test_quality.py
 data_env/bin/python3 tests/test_models.py
+data_env/bin/python3 tests/test_evaluation.py
+data_env/bin/python3 tests/test_clustering.py
+data_env/bin/python3 tests/test_ethics.py
 ```
 
 They also collect under `pytest` if you install it. They test against synthetic data with

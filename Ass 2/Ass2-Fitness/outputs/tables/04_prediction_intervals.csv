@@ -1,0 +1,9 @@
+tier,interval,n,coverage,mean_width
+Sedentary,Constant width,327,1.0,298.731
+Sedentary,Quantile regression,327,0.841,181.023
+Moderate,Constant width,347,0.7867,298.731
+Moderate,Quantile regression,347,0.7867,296.5763
+Active,Constant width,326,0.5798,298.731
+Active,Quantile regression,326,0.7577,415.6358
+All users,Constant width,1000,0.789,298.731
+All users,Quantile regression,1000,0.795,297.6038

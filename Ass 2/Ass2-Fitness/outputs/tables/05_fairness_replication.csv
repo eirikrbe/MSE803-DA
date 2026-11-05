@@ -1,0 +1,4 @@
+location,"test set, model with demographics","test set, model without demographics","training users, out-of-fold"
+Urban,0.9364,0.9364,0.8654
+Suburban,0.8125,0.8304,0.8326
+Rural,0.9143,0.9238,0.8341

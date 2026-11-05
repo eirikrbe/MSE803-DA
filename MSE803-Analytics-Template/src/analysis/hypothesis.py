@@ -109,6 +109,98 @@ def chi2_independence(df, col_a, col_b):
             'dof': int(dof), 'cells_below_5': n_small}
 
 
+def holm_adjust(p_values):
+    """Holm step-down adjustment across a family of tests.
+
+    Controls the chance of any false positive in the family, and is uniformly
+    more powerful than Bonferroni. Returns the adjusted p-values in the input
+    order, capped at 1.
+    """
+    p = np.asarray(p_values, float)
+    m = len(p)
+    order = np.argsort(p)
+    adjusted = np.empty(m)
+    running = 0.0
+    for rank, idx in enumerate(order):
+        running = max(running, (m - rank) * p[idx])
+        adjusted[idx] = min(1.0, running)
+    return adjusted
+
+
+def cramers_v(table):
+    """Cramér's V for a contingency table (array or DataFrame of counts).
+
+    0 means no association. Below 0.1 is conventionally negligible (Cohen, 1988).
+    """
+    table = np.asarray(table, float)
+    chi2 = stats.chi2_contingency(table, correction=False)[0]
+    n = table.sum()
+    k = min(table.shape) - 1
+    return float(np.sqrt(chi2 / (n * k))) if n and k else 0.0
+
+
+def epsilon_squared(h_statistic, n):
+    """Effect size for Kruskal-Wallis: the share of rank variance explained by
+    group, H / (n - 1). Below 0.01 is negligible."""
+    return float(h_statistic / (n - 1))
+
+
+def rank_biserial(a, b):
+    """Rank-biserial correlation for two independent groups, from Mann-Whitney U.
+
+    The probability that a value from `a` exceeds one from `b`, minus the reverse.
+    Ranges from -1 to 1; |r| below 0.1 is negligible.
+    """
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    u = stats.mannwhitneyu(a, b, alternative='two-sided').statistic
+    return float(2 * u / (len(a) * len(b)) - 1)
+
+
+def spearman_ci(rho, n, level=0.90):
+    """Fisher-z interval for a Spearman correlation (Fieller et al. variance).
+
+    A 90% interval inside (-0.1, 0.1) is a two one-sided tests (TOST) verdict at
+    alpha = 0.05 that the association is negligible, not just undetected.
+    """
+    z = np.arctanh(rho)
+    se = np.sqrt(1.06 / (n - 3))
+    q = stats.norm.ppf(1 - (1 - level) / 2)
+    return float(np.tanh(z - q * se)), float(np.tanh(z + q * se))
+
+
+def bootstrap_effect_ci(fn, groups, B=2000, seed=0, level=0.90):
+    """Percentile bootstrap interval for an effect size computed from groups.
+
+    `fn` takes a list of 1-D arrays (one per group) and returns the effect size.
+    Each group is resampled within itself, which keeps the group sizes fixed.
+    """
+    rng = np.random.default_rng(seed)
+    groups = [np.asarray(g, float) for g in groups]
+    draws = np.empty(B)
+    for i in range(B):
+        draws[i] = fn([g[rng.integers(0, len(g), len(g))] for g in groups])
+    tail = (1 - level) / 2
+    return float(np.quantile(draws, tail)), float(np.quantile(draws, 1 - tail))
+
+
+def bootstrap_rows_ci(fn, df, B=2000, seed=0, level=0.90):
+    """Percentile bootstrap interval for a statistic of a whole DataFrame.
+
+    Rows are resampled jointly, which is what an association between two
+    columns needs (Cramér's V, for instance). `fn` takes a DataFrame and
+    returns a number.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(df)
+    draws = np.empty(B)
+    for i in range(B):
+        # A resample repeats rows; a fresh index keeps label-aligning code (crosstab) working.
+        draws[i] = fn(df.iloc[rng.integers(0, n, n)].reset_index(drop=True))
+    tail = (1 - level) / 2
+    return float(np.quantile(draws, tail)), float(np.quantile(draws, 1 - tail))
+
+
 def permutation_test(y_true, y_model, B=2000, seed=0):
     """Is the model's error better than chance? Promoted from W3's modeling.py.
 

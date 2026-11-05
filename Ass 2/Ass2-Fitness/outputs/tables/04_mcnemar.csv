@@ -1,0 +1,5 @@
+model_a,model_b,a_right_b_wrong,a_wrong_b_right,p_value,p_holm
+Logistic regression,Gradient boosting,88,52,0.00296,0.01183
+Logistic regression,SVM (RBF kernel),32,17,0.04438,0.13315
+Logistic regression,Random forest,38,33,0.63531,1.0
+Logistic regression,Structural Bayes rule,26,24,0.88772,1.0

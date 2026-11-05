@@ -1,0 +1,13 @@
+variable,level,n,pct
+gender,Male,2538,50.8
+gender,Female,2462,49.2
+activity_level,Moderate,1734,34.7
+activity_level,Sedentary,1634,32.7
+activity_level,Active,1632,32.6
+location,Rural,1684,33.7
+location,Suburban,1678,33.6
+location,Urban,1638,32.8
+age_band,18–29,1460,29.2
+age_band,40–49,1217,24.3
+age_band,50–59,1167,23.3
+age_band,30–39,1156,23.1

@@ -1,0 +1,7 @@
+model,data,accuracy,test_twins
+1-nearest neighbour,copies kept,0.7428,87.6
+1-nearest neighbour,copies removed,0.7175,0.0
+Logistic regression,copies kept,0.7832,87.6
+Logistic regression,copies removed,0.78,0.0
+"Random forest, unlimited depth",copies kept,0.7888,87.6
+"Random forest, unlimited depth",copies removed,0.7682,0.0
