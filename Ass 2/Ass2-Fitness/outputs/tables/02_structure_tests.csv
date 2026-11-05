@@ -1,0 +1,6 @@
+quantity,test,statistic,p_value,n
+sessions within Sedentary (50-99),chi-square vs discrete uniform,53.39290085679315,0.309219803623975,1634
+sessions within Moderate (100-149),chi-square vs discrete uniform,30.244521337946946,0.9838575288758747,1734
+sessions within Active (150-199),chi-square vs discrete uniform,43.12254901960784,0.7092377062873798,1632
+"km_per_session vs uniform(0.5, 1)",Kolmogorov-Smirnov D,0.015549755385146025,0.17650105868526533,4997
+"kcal_per_session vs uniform(2, 5)",Kolmogorov-Smirnov D,0.01810769230769238,0.07442559405250504,5000

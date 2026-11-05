@@ -1,0 +1,18 @@
+=IFS(C2<=2.45, "Iris-setosa", D2<=1.75, "Iris-versicolor", TRUE, "Iris-virginica")
+
+=IF(C2>5.0, IF(E2="Iris-virginica", "Match (Virginica)", "Violation (Versicolor)"), "PL <= 5cm")
+
+
+Actual Setosa:
+	=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-setosa")
+	=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-versicolor")
+	=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-virginica")
+
+Actual Versicolor:
+	=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-setosa")
+	=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-versicolor")
+	=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-virginica")
+Actual Virginica:
+	=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-setosa")
+	=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-versicolor")
+	=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-virginica"

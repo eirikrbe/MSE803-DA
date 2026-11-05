@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="en-NZ">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fitness App Analytics</title>
+<meta name="description" content="What one year of fitness-app user data can predict, and how to use it responsibly: validation, models, privacy and cultural relevance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+<style>
+/* Ako Kupu design system (style.css), light only by design. The UI tokens are copied verbatim.
+   Chart colours are hex because SVG attributes read them; the oxygen bands keep Figure C's colours. */
+:root {
+  color-scheme: light;
+  --paper: oklch(0.974 0.007 84); --paper-2: oklch(0.955 0.009 84); --surface: oklch(0.995 0.003 84);
+  --ink: oklch(0.265 0.013 70); --ink-soft: oklch(0.46 0.012 72); --ink-faint: oklch(0.62 0.010 75);
+  --line: oklch(0.90 0.010 80); --line-2: oklch(0.84 0.012 80);
+  --pounamu: oklch(0.525 0.072 168); --pounamu-d: oklch(0.44 0.070 168); --pounamu-t: oklch(0.92 0.035 168);
+  --kowhai: oklch(0.78 0.105 80); --kowhai-d: oklch(0.52 0.090 72); --kowhai-t: oklch(0.94 0.045 84);
+  --moana: oklch(0.60 0.058 222); --moana-t: oklch(0.93 0.028 222);
+  --whero: oklch(0.565 0.125 28); --whero-t: oklch(0.93 0.040 30);
+  --r-sm: 10px; --r-md: 16px; --r-lg: 24px;
+  --shadow-sm: 0 1px 2px oklch(0.4 0.02 70 / 0.04), 0 2px 6px oklch(0.4 0.02 70 / 0.05);
+  --shadow-md: 0 2px 4px oklch(0.4 0.02 70 / 0.04), 0 8px 24px oklch(0.4 0.02 70 / 0.07);
+  --sans: "Hanken Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --display: "Bricolage Grotesque", "Hanken Grotesk", system-ui, sans-serif;
+
+  /* read by the charts */
+  --c-ink: #29241e; --c-soft: #5c5751; --c-faint: #8a8580; --c-line: #e1ddd7; --c-grid: #eeeae4;
+  --c-surface: #fefdfb; --c-accent: #3c7862; --c-context: #c6c1b8; --c-guide: #dcefe6; --c-low: #8c3a24;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.55;
+  -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+p { margin: 0; }
+button { font-family: var(--sans); }
+.app { max-width: 1440px; margin: 0 auto; padding: 18px 24px 28px; display: grid; gap: 14px; }
+
+/* header */
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.brandrow { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.mark { width: 42px; height: 42px; border-radius: 12px; background: var(--pounamu); color: #fff; display: grid;
+  place-items: center; box-shadow: var(--shadow-sm); flex: none; }
+.mark svg { width: 26px; height: 26px; }
+.eyebrow { font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; color: var(--pounamu); }
+h1 { font-size: clamp(24px, 3.2vw, 32px); font-weight: 700; margin-top: 2px; text-wrap: balance; }
+.sub { margin-top: 4px; color: var(--ink-soft); font-size: 14.5px; max-width: 78ch; }
+.byline { margin-top: 2px; color: var(--ink-faint); font-size: 13px; }
+.segmented { display: flex; background: var(--paper-2); border-radius: 999px; padding: 4px; width: fit-content; max-width: 100%; }
+.segmented button { background: none; border: none; border-radius: 999px; padding: 8px 18px; font: 600 14px var(--sans);
+  color: var(--ink-soft); cursor: pointer; transition: .14s; white-space: nowrap; }
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+.segmented.small button { padding: 6px 13px; font-size: 13px; }
+.sm { display: none; }
+.niho { height: 12px; background-image: linear-gradient(135deg, var(--pounamu) 25%, transparent 25%),
+  linear-gradient(225deg, var(--pounamu) 25%, transparent 25%); background-size: 20px 12px; opacity: .9; }
+
+/* layout and cards */
+main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-sm); }
+.mainc { position: relative; padding: 20px 22px 22px; min-width: 0; }
+.cardhead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 10px 20px; margin-bottom: 14px; }
+.cardhead > div:first-child { min-width: 0; flex: 1 1 340px; }
+.ctitle { font-size: clamp(18px, 2vw, 21px); font-weight: 650; text-wrap: balance; }
+.csub { margin-top: 4px; color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+.panel { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.sectionlabel { margin: 4px 0 0; font: 700 12px/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.mainc .sectionlabel { margin: 22px 0 10px; }
+.note { font-size: 13.5px; color: var(--ink-soft); }
+.mainc > div > .note, .mainc .note { margin-top: 10px; }
+.attrib { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--ink-faint); line-height: 1.5; }
+
+/* KPI tiles */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kpi { display: grid; gap: 3px; align-content: start; padding: 12px 14px; border-radius: var(--r-md); background: var(--paper-2); min-width: 0; }
+.kpi-label { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.kpi-value { font: 700 clamp(22px, 2.3vw, 30px)/1.05 var(--display); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi-sub { font-size: 12px; color: var(--ink-faint); line-height: 1.35; }
+
+/* charts */
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; }
+.chart text { fill: var(--c-faint); font: 500 11px var(--sans); font-variant-numeric: tabular-nums; }
+.chart text.slab { fill: var(--c-ink); font: 700 15px var(--display); }
+.chart text.sstat { fill: var(--c-soft); font: 500 12.5px var(--sans); }
+.chart text.mlab { fill: var(--c-soft); font: 600 12px var(--sans); }
+.chart text.blab { fill: var(--c-soft); font: 700 11px var(--sans); }
+.chart text.val { fill: var(--c-ink); font: 600 12.5px var(--sans); }
+.chart text.val.hi { font-weight: 800; }
+.chart text.sp { fill: var(--c-ink); font: 700 15px var(--display); }
+.chart text.st { fill: var(--c-soft); font: 500 12px var(--sans); }
+.tip { position: absolute; z-index: 20; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--line); border-radius: var(--r-sm); padding: 9px 12px; font-size: 13.5px; line-height: 1.45;
+  box-shadow: var(--shadow-md); max-width: 290px; }
+.tip b { font-family: var(--display); font-weight: 700; font-size: 15px; }
+.tip .when { color: var(--ink-faint); font-size: 12.5px; }
+.hlnote { margin-top: 8px; font-size: 13.5px; color: var(--ink-soft); }
+.linkbtn { border: none; background: none; padding: 0; font: 600 13.5px var(--sans); color: var(--pounamu-d); cursor: pointer;
+  text-decoration: underline; text-underline-offset: 2px; }
+
+/* river check grid and legend */
+.rgrid { display: grid; gap: 6px; align-items: center; }
+.gmonth { font-size: 12px; font-weight: 600; color: var(--ink-soft); text-align: center; }
+.gsite { font: 700 13px var(--display); padding-right: 4px; }
+.gtile { border: 2px solid transparent; border-radius: 10px; padding: 7px 8px 6px; cursor: pointer; display: grid; text-align: left;
+  font-family: var(--sans); transition: .14s; line-height: 1.15; }
+.gtile b { font: 700 19px var(--display); }
+.gtile span { font-size: 11.5px; font-variant-numeric: tabular-nums; opacity: .9; }
+.gtile:hover { transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+.gtile.on { border-color: var(--ink); }
+.legend { list-style: none; margin: 0; padding: 0; display: grid; }
+.legend li { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 10px; padding-block: 6px;
+  border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.legend li:last-child { border-bottom: 0; }
+.legend .sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid oklch(0.4 0.02 70 / .15); }
+.legend .lg-m { color: var(--ink-faint); font-size: 12.5px; }
+
+/* badges, chips and lists */
+.badge { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px;
+  line-height: 1.25; }
+.k-crit { background: var(--whero-t); color: var(--whero); }
+.k-int { background: var(--kowhai-t); color: var(--kowhai-d); }
+.k-out { background: var(--moana-t); color: oklch(0.48 0.06 222); }
+.k-miss { background: var(--paper-2); color: var(--ink-soft); }
+.b-threat { background: var(--whero-t); color: var(--whero); }
+.b-risk { background: var(--kowhai-t); color: var(--kowhai-d); }
+.b-ok { background: var(--pounamu-t); color: var(--pounamu-d); }
+.b-intro { background: var(--paper-2); color: var(--ink-soft); }
+.dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; margin-right: 7px; }
+.dot.k-crit { background: var(--whero); } .dot.k-int { background: var(--kowhai-d); }
+.dot.k-out { background: var(--moana); } .dot.k-miss { background: var(--ink-faint); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 12px; }
+.chips button { display: inline-flex; align-items: center; font: 600 12.5px/1 var(--sans); color: var(--ink-soft);
+  background: var(--paper-2); border: 1.5px solid transparent; border-radius: 999px; padding: 8px 13px; cursor: pointer; transition: .14s; }
+.chips button:hover { border-color: var(--line-2); }
+.chips button[aria-pressed="true"] { background: var(--surface); border-color: var(--ink); color: var(--ink); }
+.matrix { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.mx { width: 100%; display: grid; grid-template-columns: 168px 1fr; gap: 3px 14px; align-items: start; text-align: left;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 12px 14px; cursor: pointer;
+  font-family: var(--sans); color: var(--ink); transition: .14s; }
+.mx:hover { border-color: var(--line-2); box-shadow: var(--shadow-sm); }
+.mx.on { background: var(--pounamu-t); border-color: var(--pounamu); }
+.mx .badge { grid-row: span 2; justify-self: start; }
+.mxp { font: 600 15px/1.3 var(--display); }
+.mxd { font-size: 13px; color: var(--ink-soft); }
+.species { list-style: none; margin: 0; padding: 0; display: grid; }
+.species li { padding-block: 10px; border-bottom: 1px solid var(--line); display: grid; gap: 5px; }
+.species li:last-child { border-bottom: 0; }
+.species li > div { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.species b { font: 700 15px var(--display); }
+.spmeta { font-size: 12.5px; color: var(--ink-faint); }
+
+/* validation flow */
+.flows { display: grid; gap: 16px; }
+.flowhead { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 13.5px; margin-bottom: 6px; }
+.flowhead b { font: 700 14.5px var(--display); }
+.flowhead span { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.bar { display: flex; height: 16px; border-radius: 999px; overflow: hidden; gap: 2px; background: var(--surface); }
+.seg { display: block; min-width: 3px; }
+.s-kept { background: var(--pounamu); } .s-copy { background: #c9c2b6; } .s-alt { background: #8a8580; }
+.s-inv { background: #4d4842; } .s-merge { background: var(--kowhai); }
+.flowkey { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 12.5px; color: var(--ink-soft); }
+.flowkey li { display: inline-flex; align-items: center; gap: 6px; }
+.flowkey .sw { width: 10px; height: 10px; border-radius: 3px; }
+.flowkey b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.sel { display: grid; gap: 8px; padding: 14px 16px; border-radius: var(--r-md); background: var(--paper-2); }
+.sel .badge { justify-self: start; }
+.sel h3 { font-size: 17px; font-weight: 700; }
+.seldec { font-size: 13.5px; color: var(--ink-soft); }
+.cmp { display: grid; gap: 6px; padding: 10px 12px; background: var(--surface); border-radius: var(--r-sm); border: 1px solid var(--line); }
+.cmpm { font-size: 12.5px; font-weight: 600; color: var(--ink-soft); }
+.cmpv { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.cmpv div { display: grid; }
+.cmpv div span { font-size: 11.5px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.cmpv b { font: 700 24px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.cmpv b.alt { color: var(--whero); }
+.cmpv .arrow { font-size: 20px; color: var(--ink-faint); padding-bottom: 2px; }
+
+/* findings rows */
+.prows { display: grid; }
+.prow { display: grid; grid-template-columns: minmax(200px, 1.25fr) minmax(170px, 1fr) 118px; gap: 4px 16px; align-items: center;
+  padding-block: 9px; border-bottom: 1px solid var(--line); }
+.prow.axis { border-bottom: 0; padding-block: 0; }
+.prow:last-child { border-bottom: 0; }
+.pl { font-size: 14px; line-height: 1.35; }
+.pl b { font-family: var(--display); margin-right: 6px; }
+.pl small { display: block; color: var(--ink-faint); font-size: 12px; margin-top: 2px; }
+.pv { display: grid; justify-items: start; gap: 3px; font-size: 13px; font-variant-numeric: tabular-nums; }
+.pdot svg, .paxis svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pdot text, .paxis text { fill: var(--c-faint); font: 500 11px var(--sans); }
+.yes { background: var(--pounamu-t); color: var(--pounamu-d); }
+.no { background: var(--paper-2); color: var(--ink-soft); }
+.summary p { font-size: 13.5px; margin-top: 6px; }
+.summary ul { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-soft); }
+
+/* tables */
+details.datatable { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+details.datatable summary { cursor: pointer; font-weight: 600; font-size: 13.5px; color: var(--pounamu-d); width: fit-content; }
+.tblwrap { overflow-x: auto; margin-top: 8px; }
+.tblwrap.scroll { max-height: 380px; overflow-y: auto; }
+.tbl { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.tbl th { position: sticky; top: 0; background: var(--surface); text-align: left; font-size: 11.5px; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--ink-faint); font-weight: 700; padding: 6px 10px 8px; vertical-align: bottom; }
+.tbl td { padding: 7px 10px; border-top: 1px solid var(--line); font-size: 13.5px; vertical-align: middle; }
+.tbl tr:hover td { background: var(--paper-2); }
+.tbl .r { text-align: right; }
+.tbl th.r { text-align: right; }
+.tbl small { color: var(--ink-faint); font-size: 11.5px; }
+.tbl td.chosen, .tbl th.chosen { background: var(--pounamu-t); }
+.tbl tr:hover td.chosen { background: var(--pounamu-t); }
+.tbl td.diff { background: var(--kowhai-t); font-weight: 600; }
+.tick { color: var(--pounamu-d); font-weight: 700; }
+.bandchip { display: inline-grid; place-items: center; width: 22px; height: 20px; border-radius: 5px; font-weight: 700; font-size: 12px; }
+
+button:focus-visible, summary:focus-visible { outline: none; box-shadow: 0 0 0 4px var(--pounamu-t); }
+.segmented button:focus-visible { box-shadow: 0 0 0 3px var(--pounamu-t); }
+@media (max-width: 1100px) { main { grid-template-columns: minmax(0, 1fr) 320px; } }
+@media (max-width: 880px) {
+  main { grid-template-columns: 1fr; }
+  .app { padding: 14px 16px 24px; }
+}
+@media (max-width: 600px) {
+  .mainc { padding: 16px 14px 18px; }
+  .panel { padding: 16px 14px; }
+  .segmented button { padding: 8px 12px; font-size: 13px; }
+  .lg { display: none; } .sm { display: inline; }
+  .mx { grid-template-columns: 1fr; }
+  .mx .badge { grid-row: auto; }
+  .prow { grid-template-columns: 1fr 104px; }
+  .prow .pdot, .prow .paxis { grid-column: 1 / -1; grid-row: 2; }
+  .prow.axis > span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* Ass 2 additions */
+.kpis.k4 { grid-template-columns: repeat(4, minmax(0, 1fr)); margin-bottom: 4px; }
+.kpis.k3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.kpi-value.acc { color: var(--pounamu-d); }
+.kpi-value.warn { color: var(--whero); }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.list li { font-size: 13.5px; color: var(--ink-soft); line-height: 1.45; padding-left: 14px; position: relative; }
+.list li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: var(--pounamu); }
+.list li b { color: var(--ink); font-weight: 650; }
+.mrow { display: grid; grid-template-columns: minmax(0, 1.2fr) 150px minmax(0, 1.5fr); gap: 4px 16px; padding: 11px 0;
+  border-bottom: 1px solid var(--line); align-items: start; }
+.mrow:last-child { border-bottom: 0; }
+.mrow .mxp { font-size: 14.5px; }
+.mrow .mxd { font-size: 13px; }
+.mrow .badge { justify-self: start; }
+.cm { border-collapse: separate; border-spacing: 4px; font-variant-numeric: tabular-nums; }
+.cm th { font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-faint); font-weight: 700; padding: 4px 8px; }
+.cm td { width: 118px; height: 58px; text-align: center; border-radius: 10px; font: 700 18px var(--display); }
+.cm td small { display: block; font: 500 11.5px var(--sans); opacity: .85; }
+.heat td { text-align: center; font-variant-numeric: tabular-nums; border-radius: 6px; }
+.guide { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.guide li { display: grid; grid-template-columns: 38px 1fr; gap: 2px 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.guide li:last-child { border-bottom: 0; }
+.guide .gid { font: 700 13px var(--display); color: var(--pounamu-d); }
+.guide .gt { font-size: 13.5px; font-weight: 650; color: var(--ink); }
+.guide .gc { grid-column: 2; font-size: 12.5px; color: var(--ink-soft); }
+.stage { margin-top: 6px; font: 700 11.5px/1.3 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-faint); }
+.seg-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 4px 0 12px; }
+.seg-row .note { margin: 0; }
+@media (max-width: 880px) { .kpis.k4 { grid-template-columns: 1fr 1fr; } .mrow { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brandrow">
+      <span class="mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12.5h3.6l2.4-6 4.2 12 2.8-7.5 1.4 1.5H21"/>
+        </svg>
+      </span>
+      <div>
+        <div class="eyebrow">Fitness app analytics</div>
+        <h1>What the data can predict, and how to use them responsibly</h1>
+        <p class="sub" id="subtitle"></p>
+        <p class="byline" id="byline"></p>
+      </div>
+    </div>
+    <nav class="segmented" id="views" aria-label="Dashboard view">
+      <button type="button" data-view="overview" aria-pressed="true">Overview</button>
+      <button type="button" data-view="engagement" aria-pressed="false">Engagement</button>
+      <button type="button" data-view="models" aria-pressed="false">Models</button>
+      <button type="button" data-view="ethics" aria-pressed="false">Ethics</button>
+    </nav>
+  </header>
+  <div class="niho" aria-hidden="true"></div>
+  <main>
+    <section class="card mainc" id="mainc" aria-live="polite"><div id="mainbody"></div></section>
+    <aside class="card panel" id="panel"></aside>
+  </main>
+</div>
+<script>
+window.DATA = __DATA__;
+</script>
+<script>
+(function () {
+  "use strict";
+  const D = window.DATA;
+  const css = getComputedStyle(document.documentElement);
+  const C = (n) => css.getPropertyValue(n).trim();
+  const COL = { ink: C("--c-ink"), soft: C("--c-soft"), faint: C("--c-faint"), line: C("--c-line"), grid: C("--c-grid"),
+    accent: C("--c-accent"), context: C("--c-context"), guide: C("--c-guide"), low: C("--c-low") };
+  const TIERS = ["Sedentary", "Moderate", "Active"];
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const num = (x, d = 3) => (x === null || x === undefined || Number.isNaN(Number(x))) ? "–" :
+    (Math.abs(Number(x)) < 0.5 * Math.pow(10, -d) ? 0 : Number(x)).toFixed(d).replace("-", "−");
+  const pct = (x, d = 1) => (x === null || x === undefined) ? "–" : (100 * x).toFixed(d) + "%";
+  const thou = (x) => Number(x).toLocaleString("en-NZ");
+  const dashes = (s) => String(s).replace(/(\d)-(\d)/g, "$1–$2").replace(/->/g, "→").replace(/ x10/g, " ×10")
+    .replace(/>=/g, "≥").replace(/<=/g, "≤");
+  const state = { view: "overview", eng: "app_sessions", model: "calories", cost: "default 0.5", eth: "reid", eps: 1,
+    fair: "sedentary_recall" };
+
+  const kpi = (label, value, sub, cls = "") =>
+    `<div class="kpi"><span class="kpi-label">${esc(label)}</span><span class="kpi-value ${cls}">${value}</span>` +
+    `<span class="kpi-sub">${esc(sub)}</span></div>`;
+  const seg = (id, label, options, current) =>
+    `<div class="segmented small" id="${id}" role="group" aria-label="${esc(label)}">${options.map(([v, t]) =>
+      `<button type="button" data-v="${esc(v)}" aria-pressed="${String(v) === String(current)}">${esc(t)}</button>`).join("")}</div>`;
+  const table = (heads, rows, right = []) =>
+    `<div class="tblwrap"><table class="tbl"><thead><tr>${heads.map((h, i) =>
+      `<th class="${right.includes(i) ? "r" : ""}">${esc(h)}</th>`).join("")}</tr></thead><tbody>${rows.map((r) =>
+      `<tr>${r.map((c, i) => `<td class="${right.includes(i) ? "r" : ""}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const ticks = (lo, hi, n) => Array.from({ length: n + 1 }, (_, i) => lo + (hi - lo) * i / n);
+  const mix = (a, b, t) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+    const [x, y] = [p(a), p(b)]; return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join(""); };
+
+  /* ---------- charts (inline SVG) ---------- */
+  function hbars(rows, o) {
+    const W = o.W || 760, L = o.L || 270, R = 64, rowH = o.rowH || 30, top = 30;
+    const H = top + rows.length * rowH + 30;
+    const x = (v) => L + (W - L - R) * (Math.max(o.min, Math.min(o.max, v)) - o.min) / (o.max - o.min);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
+    for (const t of ticks(o.min, o.max, o.nt || 5)) s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top - 4}" y2="${top + rows.length * rowH}" stroke="${COL.grid}"/>` +
+      `<text x="${x(t)}" y="${H - 8}" text-anchor="middle">${o.fmt(t)}</text>`;
+    rows.forEach((r, i) => {
+      const y = top + i * rowH;
+      s += `<text class="mlab" x="${L - 10}" y="${y + rowH / 2 + 4}" text-anchor="end">${esc(r.label)}</text>`;
+      s += `<rect x="${x(o.min)}" y="${y + 6}" width="${Math.max(1.5, x(r.value) - x(o.min))}" height="${rowH - 12}" rx="4" fill="${r.color || COL.context}">` +
+        `<title>${esc(r.label)}: ${(o.vfmt || o.fmt)(r.value)}</title></rect>`;
+      if (r.lo !== undefined && r.lo !== null) s += `<line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${y + rowH / 2}" y2="${y + rowH / 2}" stroke="${COL.ink}" stroke-width="1.4"/>`;
+      s += `<text class="val" x="${x(r.hi !== undefined && r.hi !== null ? r.hi : r.value) + 7}" y="${y + rowH / 2 + 4}">${(o.vfmt || o.fmt)(r.value)}</text>`;
+    });
+    for (const ref of (o.refs || [])) s += `<line x1="${x(ref.x)}" x2="${x(ref.x)}" y1="${top - 8}" y2="${top + rows.length * rowH + 2}" stroke="${ref.color || COL.ink}" stroke-width="1.5" stroke-dasharray="5 4"/>` +
+      `<text class="blab" x="${x(ref.x)}" y="${top - 12}" text-anchor="${ref.anchor || "middle"}">${esc(ref.label)}</text>`;
+    return s + "</svg>";
+  }
+
+  function dotplot(rows, o) {
+    const W = o.W || 760, L = o.L || 190, R = 24, rowH = 27, top = 22, H = top + rows.length * rowH + 30;
+    const x = (v) => L + (W - L - R) * (v - o.min) / (o.max - o.min);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
+    if (o.band) s += `<rect x="${x(o.band[0])}" y="${top - 6}" width="${x(o.band[1]) - x(o.band[0])}" height="${rows.length * rowH + 6}" fill="${COL.guide}" rx="6"/>`;
+    for (const t of ticks(o.min, o.max, 4)) s += `<text x="${x(t)}" y="${H - 8}" text-anchor="middle">${o.fmt(t)}</text>`;
+    if (o.center !== undefined) s += `<line x1="${x(o.center)}" x2="${x(o.center)}" y1="${top - 8}" y2="${top + rows.length * rowH}" stroke="${COL.soft}" stroke-dasharray="4 3"/>`;
+    rows.forEach((r, i) => {
+      const y = top + i * rowH + rowH / 2;
+      s += `<text class="mlab" x="${L - 10}" y="${y + 4}" text-anchor="end">${esc(r.label)}</text>`;
+      s += `<line x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${y}" y2="${y}" stroke="${r.color || COL.accent}" stroke-width="3" stroke-linecap="round"/>`;
+      s += `<circle cx="${x(r.value)}" cy="${y}" r="5" fill="${r.color || COL.accent}"><title>${esc(r.label)}: ${o.fmt(r.value)} (95% CI ${o.fmt(r.lo)} to ${o.fmt(r.hi)}; n = ${thou(r.n)})</title></circle>`;
+    });
+    return s + "</svg>";
+  }
+
+  function density(d) {
+    const nx = d.s_edges.length - 1, ny = d.c_edges.length - 1, W = 760, L = 58, R = 12, T = 12, B = 44, ch = 17;
+    const cw = (W - L - R) / nx, H = T + ny * ch + B;
+    const max = Math.max(...d.counts.flat().filter((c) => c !== null));
+    const xs = (s) => L + (s - d.s_edges[0]) / (d.s_edges[nx] - d.s_edges[0]) * (W - L - R);
+    const yc = (c) => T + ny * ch - (c - d.c_edges[0]) / (d.c_edges[ny] - d.c_edges[0]) * ny * ch;
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Users per cell of app sessions and calories">` +
+      `<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">` +
+      `<line x1="0" y1="0" x2="0" y2="6" stroke="${COL.context}" stroke-width="2"/></pattern></defs>`;
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+      const c = d.counts[j][i], x = L + i * cw, y = T + (ny - 1 - j) * ch;
+      const lab = `${d.s_edges[i]}–${d.s_edges[i + 1] - 1} sessions, ${d.c_edges[j]}–${d.c_edges[j + 1] - 1} kcal`;
+      if (c === null) s += `<rect x="${x + 1}" y="${y + 1}" width="${cw - 2}" height="${ch - 2}" fill="url(#hatch)"><title>${lab}: fewer than ${d.min_cell} users (suppressed)</title></rect>`;
+      else if (c > 0) s += `<rect x="${x + 1}" y="${y + 1}" width="${cw - 2}" height="${ch - 2}" rx="2" fill="${mix("#eef2ec", "#1f4f3f", Math.sqrt(c / max))}"><title>${lab}: ${c} users</title></rect>`;
+    }
+    for (const [k, lab] of [[2, "2 kcal per session"], [5, "5 kcal per session"]]) {
+      const s1 = d.s_edges[0], s2 = Math.min(d.s_edges[nx], d.c_edges[ny] / k);
+      s += `<line x1="${xs(s1)}" y1="${yc(Math.max(d.c_edges[0], k * s1))}" x2="${xs(s2)}" y2="${yc(k * s2)}" stroke="${COL.ink}" stroke-width="1.4" stroke-dasharray="5 4"/>` +
+        (k === 2 ? `<text class="blab" x="${xs(s2 - 15)}" y="${yc(k * (s2 - 15)) + 44}" text-anchor="end">${lab} (no user below)</text>`
+                  : `<text class="blab" x="${xs(s2) - 4}" y="${yc(k * s2) - 6}" text-anchor="end">${lab}</text>`);
+    }
+    for (let i = 0; i <= nx; i += 3) s += `<text x="${xs(d.s_edges[i])}" y="${T + ny * ch + 16}" text-anchor="middle">${d.s_edges[i]}</text>`;
+    for (let j = 0; j <= ny; j += 3) s += `<text x="${L - 8}" y="${yc(d.c_edges[j]) + 4}" text-anchor="end">${d.c_edges[j]}</text>`;
+    s += `<text class="mlab" x="${L + (W - L - R) / 2}" y="${H - 6}" text-anchor="middle">App sessions in the year</text>`;
+    s += `<text class="mlab" transform="translate(14 ${T + ny * ch / 2}) rotate(-90)" text-anchor="middle">Calories burned</text>`;
+    return s + "</svg>";
+  }
+
+  function lines(series, o) {
+    const W = 760, L = 50, R = 20, T = 18, B = 40, H = 300;
+    const xs = (k) => L + (k - o.x0) / (o.x1 - o.x0) * (W - L - R), ys = (v) => T + (1 - v) * (H - T - B);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(o.aria)}">`;
+    for (const t of [0, 0.25, 0.5, 0.75, 1]) s += `<line x1="${L}" x2="${W - R}" y1="${ys(t)}" y2="${ys(t)}" stroke="${t === 0.5 ? COL.soft : COL.grid}" ${t === 0.5 ? 'stroke-dasharray="4 3"' : ""}/>` +
+      `<text x="${L - 8}" y="${ys(t) + 4}" text-anchor="end">${t.toFixed(2)}</text>`;
+    s += `<text class="blab" x="${W - R}" y="${ys(0.5) - 6}" text-anchor="end">silhouette above 0.5 = reasonable structure</text>`;
+    for (let k = o.x0; k <= o.x1; k++) s += `<text x="${xs(k)}" y="${H - 18}" text-anchor="middle">${k}</text>`;
+    s += `<text class="mlab" x="${(L + W - R) / 2}" y="${H - 2}" text-anchor="middle">Number of segments, k</text>`;
+    for (const se of series) {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="2.4" points="${se.pts.map(([k, v]) => `${xs(k)},${ys(v)}`).join(" ")}" ${se.dash ? 'stroke-dasharray="6 4"' : ""}/>`;
+      for (const [k, v] of se.pts) s += `<circle cx="${xs(k)}" cy="${ys(v)}" r="4.5" fill="${se.color}"><title>${esc(se.name)}, k = ${k}: ${v.toFixed(3)}</title></circle>`;
+    }
+    return s + "</svg>";
+  }
+
+  /* ---------- views ---------- */
+  const reg = (m) => D.regression.find((r) => r.model === m);
+  const clf = (m) => D.classification.find((r) => r.model === m);
+  const kan = (q) => D.kanon.find((r) => r.quasi_identifiers.startsWith(q));
+
+  function viewOverview() {
+    const lin = reg("Linear: sessions only"), lg = clf("Logistic regression"), base = clf("Majority-class baseline"),
+      bay = clf("Structural Bayes rule (reference ceiling)");
+    const tot = D.flow.reduce((a, b) => a + b.n, 0);
+    const segc = { kept: "s-kept", copy: "s-copy", alt: "s-alt" };
+    const klass = { "Data-integrity error": "k-int", "Statistical outlier": "k-out", "Missing data": "k-miss", "Critical anomaly": "k-crit" };
+    return `<div class="cardhead"><div><h2 class="ctitle">299 of the 5,299 records were copies; 5,000 genuine users remain</h2>
+      <p class="csub">One year of totals per user: gender, age, location type, activity level, app sessions, distance and calories.
+      Every number on this page is an aggregate from the analysis notebooks.</p></div></div>
+      <div class="kpis k4">
+        ${kpi("Users after validation", thou(D.meta.n_users), `of ${thou(D.meta.n_raw)} records`, "acc")}
+        ${kpi("Calorie model, test R²", num(lin.r2, 3), "95% CI 0.607–0.665 · theoretical ceiling 0.630")}
+        ${kpi("Tier classifier, accuracy", pct(lg.accuracy), `baseline ${pct(base.accuracy)} · ceiling ${pct(bay.accuracy)}`)}
+        ${kpi("Unique on activity values", pct(kan("E.").pct_unique / 100), `k = ${kan("F.").min_k} after generalising`, "warn")}
+      </div>
+      <p class="sectionlabel">Where the 5,299 records went</p>
+      <div class="bar" role="img" aria-label="5,000 genuine users, 272 verbatim copies, 27 altered copies">${D.flow.map((f) =>
+        `<span class="seg ${segc[f.key]}" style="flex:${f.n}" title="${esc(f.label)}: ${thou(f.n)}"></span>`).join("")}</div>
+      <ul class="flowkey">${D.flow.map((f) => `<li><span class="sw ${segc[f.key]}"></span>${esc(f.label)} <b>${thou(f.n)}</b></li>`).join("")}
+        <li>Total <b>${thou(tot)}</b></li></ul>
+      <p class="sectionlabel">Data validation and management matrix</p>
+      <div>${D.validation.map((r) => `<div class="mrow"><span class="mxp">${esc(dashes(r.problem))}</span>
+        <span class="badge ${klass[r.classification] || "k-miss"}">${esc(r.classification)}</span>
+        <span class="mxd"><b>${esc(r.decision)}.</b> ${esc(dashes(r.impact_if_kept))}</span></div>`).join("")}</div>`;
+  }
+
+  function panelOverview() {
+    return `<p class="sectionlabel">What the data show</p><ul class="list">
+      <li><b>Activity Level is a band of sessions:</b> 50–99, 100–149, 150–199, with no exceptions.</li>
+      <li><b>Fixed rates:</b> every user travels 0.5–1.0 km and burns 2–5 kcal per session.</li>
+      <li><b>No demographic differences:</b> all 12 pre-stated tests are negligible.</li>
+      <li><b>Models at the ceiling:</b> calories test R² 0.637 (95% CI 0.607–0.665), consistent with the theoretical 0.630; tier 78.2% against a 78.0% reference.</li>
+      <li><b>Privacy:</b> 99.8% of users are unique on their exact activity values alone.</li>
+      <li><b>Label validity:</b> 29% of “Sedentary” users burned more than the lowest-burning “Active” user.</li></ul>
+      <p class="sectionlabel">What they cannot show</p><ul class="list">
+      <li>Causation, change over time or effects on health: one simulated year of totals.</li>
+      <li>Anyone under 18 or over 59, gender beyond two categories, ethnicity, language or disability.</li></ul>
+      <p class="attrib">Prepared from the fitness-app dataset (5,299 records) after validation. Aggregates only: no row-level
+      record is published, and any count under ${D.meta.min_cell} users is suppressed (guideline G6).</p>`;
+  }
+
+  const OUT = { app_sessions: "App sessions", km_per_session: "km per session", kcal_per_session: "kcal per session" };
+  function viewEngagement() {
+    const label = OUT[state.eng], sd = D.sds.find((r) => r.variable === state.eng).std;
+    const rows = D.profile.filter((r) => r.outcome === label);
+    const overall = rows[0].overall_mean;
+    const attr = { gender: "Gender", location: "Location", age_band: "Age" };
+    const d = state.eng === "app_sessions" ? 1 : (state.eng === "km_per_session" ? 3 : 2);
+    return `<div class="cardhead"><div><h2 class="ctitle">Engagement follows a simple, rigid structure</h2>
+      <p class="csub">Users per cell of sessions and calories. Every user lies between 2 and 5 kcal per session; the spread
+      widens with sessions. Hatched cells hold fewer than ${D.density.min_cell} users and are suppressed.</p></div></div>
+      <div class="chart">${density(D.density)}</div>
+      <p class="sectionlabel">No demographic group differs</p>
+      <div class="seg-row">${seg("eng", "Outcome", Object.entries(OUT), state.eng)}
+        <p class="note">Shaded: within 0.1 SD of all users, the negligible range.</p></div>
+      <div class="chart">${dotplot(rows.map((r) => ({ label: `${attr[r.attribute]} · ${r.group}`, value: r.mean, lo: r.ci_low, hi: r.ci_high, n: r.n })),
+        { min: overall - 0.5 * sd, max: overall + 0.5 * sd, center: overall, band: [overall - 0.1 * sd, overall + 0.1 * sd],
+          fmt: (v) => num(v, d), aria: `${label} by group, with 95% intervals` })}</div>
+      <details class="datatable"><summary>The three tiers</summary>${table(["Tier", "Users", "Sessions", "km", "kcal", "km/session", "kcal/session"],
+        D.tiers.map((t) => [t.activity_level, thou(t.n), num(t.sessions, 1), num(t.distance_km, 1), num(t.calories, 1), num(t.km_per_session, 2), num(t.kcal_per_session, 2)]),
+        [1, 2, 3, 4, 5, 6])}</details>`;
+  }
+
+  function panelEngagement() {
+    const sym = { "rank-biserial r": "r", "epsilon squared": "ε²", "Spearman rho": "ρ", "Cramér's V": "V" };
+    return `<p class="sectionlabel">Twelve tests, stated before testing</p>
+      ${table(["H", "Comparison", "Effect", "Holm p"], D.tests.map((t) => [`<b>${t.H}</b>`,
+        esc(t.id.replace(" ~ ", " by ")), `<span title="90% CI ${num(t.ci90_low)} to ${num(t.ci90_high)}">${sym[t.effect]} ${num(t.value)}</span>`,
+        `${t.p_holm < 1 ? num(t.p_holm) : "1.000"}`]), [3])}
+      <p class="note"><span class="badge yes">all 12 negligible</span> Every 90% interval lies inside the bound.</p>
+      <p class="note">Holm-adjusted across all twelve. Negligible means the 90% interval lies inside ±0.1 (0.01 for ε²), a two
+      one-sided tests verdict. Power at the strictest step: d = 0.105, f = 0.057, ρ = 0.052.</p>`;
+  }
+
+  function viewModels() {
+    let body = "";
+    if (state.model === "calories") {
+      const order = ["Mean baseline", "Linear: sessions only", "Linear: all predictors", "Random forest", "Gradient boosting", "Structural rule: 3.5 kcal x sessions"];
+      const rows = order.map((m) => { const r = reg(m); const ci = String(r.r2_ci).match(/(-?[\d.]+)-(-?[\d.]+)/);
+        return { label: m.replace("x sessions", "× sessions"), value: r.r2, lo: ci ? +ci[1] : null, hi: ci ? +ci[2] : null,
+          color: m.startsWith("Linear: sessions") ? COL.accent : (m.startsWith("Structural") ? COL.ink : COL.context) }; });
+      const iv = (t, k) => D.intervals.find((r) => r.tier === t && r.interval === k);
+      body = `<p class="csub">Test R² on 1,000 held-out users, with 95% bootstrap intervals. Dashed: the analytic ceiling.</p>
+        <div class="chart">${hbars(rows, { min: 0, max: 0.7, nt: 7, fmt: (v) => num(v, 2), vfmt: (v) => num(v, 3), refs: [{ x: 0.63, label: "ceiling 0.630" }], aria: "Test R squared by model" })}</div>
+        <p class="sectionlabel">80% prediction intervals: coverage by tier</p>
+        ${table(["Tier", "Constant width", "Quantile regression", "Width (quantile)"], [...TIERS, "All users"].map((t) =>
+          [t, pct(iv(t, "Constant width").coverage, 0), `<b>${pct(iv(t, "Quantile regression").coverage, 0)}</b>`, `${num(iv(t, "Quantile regression").mean_width, 0)} kcal`]), [1, 2, 3])}
+        <p class="note">A constant band is too wide for occasional users and too narrow for frequent ones; quantile regression keeps
+        coverage near 80% in every tier. Show calories as a range that widens with activity.</p>`;
+    } else if (state.model === "tier") {
+      const order = ["Majority-class baseline", "Logistic regression: demographics only", "Logistic regression", "k-nearest neighbours (k = 25)",
+        "SVM (RBF kernel)", "Random forest", "Gradient boosting", "Structural Bayes rule (reference ceiling)"];
+      const rows = order.map((m) => { const r = clf(m); const ci = String(r.accuracy_ci || "").match(/(-?[\d.]+)-(-?[\d.]+)/);
+        return { label: m.replace(" (reference ceiling)", ""), value: r.accuracy, lo: ci ? +ci[1] : null, hi: ci ? +ci[2] : null,
+          color: m === "Logistic regression" ? COL.accent : (m.startsWith("Structural") ? COL.ink : COL.context) }; });
+      const cm = D.confusion, tot = cm.counts.map((r) => r.reduce((a, b) => a + b, 0));
+      const op = D.thresholds.find((r) => r.miss_cost_ratio === state.cost);
+      body = `<p class="csub">Tier from distance and calories (sessions excluded as leakage). Test accuracy with 95% intervals.</p>
+        <div class="chart">${hbars(rows, { min: 0, max: 1, nt: 5, fmt: (v) => pct(v, 0), vfmt: (v) => pct(v, 1), L: 300,
+          refs: [{ x: clf("Majority-class baseline").accuracy, label: "baseline", anchor: "start" }, { x: 0.78, label: "ceiling", anchor: "end" }], aria: "Test accuracy by model" })}</div>
+        <p class="sectionlabel">Logistic regression: where the errors fall</p>
+        <table class="cm"><tr><th></th>${cm.labels.map((l) => `<th>Predicted ${esc(l)}</th>`).join("")}</tr>
+        ${cm.counts.map((r, i) => `<tr><th>${esc(cm.labels[i])}</th>${r.map((c, j) => { const sh = c / tot[i];
+          return `<td style="background:${mix("#f6f3ee", "#2f6150", sh)};color:${sh > 0.5 ? "#fefdfb" : COL.ink}">${c}<small>${pct(sh, 0)}</small></td>`; }).join("")}</tr>`).join("")}</table>
+        <p class="sectionlabel">Flagging Sedentary users for a nudge</p>
+        <div class="seg-row">${seg("cost", "Cost of a missed user", D.thresholds.map((r) => [r.miss_cost_ratio, r.miss_cost_ratio === "default 0.5" ? "Default 0.5" : `Miss costs ${r.miss_cost_ratio}`]), state.cost)}</div>
+        <div class="kpis k4">${kpi("Threshold", num(op.threshold, 2), "probability of Sedentary")}${kpi("Precision", pct(op.precision), "share of flags that are right")}
+          ${kpi("Recall", pct(op.recall), "share of Sedentary users found", "acc")}${kpi("Missed / false alarms", `${op.missed} / ${op.false_alarms}`, `of ${op.flagged} flagged`)}</div>`;
+    } else {
+      const k = D.kmeans;
+      body = `<p class="csub">k-means on standardised sessions, km per session and kcal per session (4,997 users).</p>
+        <div class="chart">${lines([{ name: "Silhouette", color: COL.accent, pts: k.map((r) => [r.k, r.silhouette]) },
+          { name: "Bootstrap stability (ARI)", color: "#b4573f", dash: true, pts: k.map((r) => [r.k, r.stability_ari]) }],
+          { x0: 2, x1: 8, aria: "Silhouette and stability by number of segments" })}</div>
+        <p class="note"><b style="color:${COL.accent}">Silhouette</b> stays at 0.24–0.28 for every k; <b style="color:#b4573f">stability</b> rises
+        with k only because k-means cuts an even cloud into the same blocks. Hopkins statistic 0.49: no natural segments.</p>
+        <p class="sectionlabel">Rule-based segments instead: tier × intensity</p>
+        ${table(["Tier", "Intensity (kcal per session)", "Users"], D.rule_segments.map((r) => [r.activity_level, r.intensity, thou(r.n)]), [2])}`;
+    }
+    return `<div class="cardhead"><div><h2 class="ctitle">The models reach the ceiling the data allow</h2></div>
+      ${seg("model", "Model", [["calories", "Calories"], ["tier", "Tier"], ["segments", "Segments"]], state.model)}</div>${body}`;
+  }
+
+  function panelModels() {
+    const infl = D.inflation;
+    return `<p class="sectionlabel">Trap 1: target leakage</p>
+      <p class="note">Predicting the tier from sessions scores <b>100%</b>: a two-split tree recovers the rule (99.5 and 149.5
+      sessions). Implement the tier as code, not as a model.</p>
+      <p class="sectionlabel">Trap 2: copies across the split</p>
+      ${table(["Model", "Accuracy gain"], infl.map((r) => [esc(r.model), `+${num(100 * r.mean, 1)} pts <small>± ${num(100 * r.std, 1)}</small>`]), [1])}
+      <p class="note">With the copies kept, about 88 test users have a twin in training, and the random forest overtakes logistic
+      regression (78.9% vs 78.3%).</p>
+      <p class="sectionlabel">Sensitivity to cleaning decisions</p>
+      ${table(["Variant", "R²", "Accuracy"], D.sensitivity.map((r) => [esc(r.variant), num(r.calories_test_r2), pct(r.tier_test_accuracy)]), [1, 2])}`;
+  }
+
+  function viewEthics() {
+    let body = "";
+    if (state.eth === "reid") {
+      const rows = D.kanon.map((r) => ({ label: r.quasi_identifiers, value: r.pct_unique / 100,
+        color: r.pct_below_k5 > 5 ? "#b4573f" : COL.accent }));
+      body = `<p class="csub">Share of users who are the only person with their combination of attributes; k is the smallest group.</p>
+        <div class="chart">${hbars(rows, { min: 0, max: 1, fmt: (v) => pct(v, 0), vfmt: (v) => pct(v, 1), L: 330, aria: "Users unique by quasi-identifier set" })}</div>
+        ${table(["Attributes", "Groups", "Smallest group (k)", "Unique", "In groups under 5"], D.kanon.map((r) =>
+          [esc(r.quasi_identifiers), thou(r.classes), `<b>${r.min_k}</b>`, `${num(r.pct_unique, 1)}%`, `${num(r.pct_below_k5, 1)}%`]), [1, 2, 3, 4])}
+        <p class="note">Removing the user ID is not anonymisation: exact sessions, distance and calories single out 99.8% of users.
+        Ten-year age bands with the tier instead of sessions give groups of at least 47.</p>`;
+    } else if (state.eth === "dp") {
+      const e = (g) => D.dp.find((r) => r.group === g && Number(r.epsilon) === Number(state.eps));
+      const small = D.dp.find((r) => r.n < 500).group;
+      const series = [...new Set(D.dp.map((r) => r.group))];
+      const rows = series.map((g) => ({ label: `${g} (n = ${thou(e(g).n)})`, value: e(g).p95_abs_error,
+        color: e(g).n < 500 ? "#b4573f" : COL.accent }));
+      body = `<p class="csub">95th-percentile error of a differentially private mean calories (Laplace mechanism, values clipped to 0–1,000).</p>
+        <div class="seg-row">${seg("eps", "Privacy budget ε", [0.1, 0.5, 1, 2, 5].map((v) => [v, `ε = ${v}`]), state.eps)}
+        <p class="note">Smaller ε = stronger privacy, more noise.</p></div>
+        <div class="kpis k3">${kpi("Location averages (about 1,650 users)", `±${num(e("Urban").p95_abs_error, 1)} kcal`, `${num(e("Urban").p95_error_pct_of_mean, 1)}% of the mean`, "acc")}
+          ${kpi(`Smallest cell: ${small}`, `±${num(e(small).p95_abs_error, 1)} kcal`, `${num(e(small).p95_error_pct_of_mean, 1)}% of the mean (n = ${e(small).n})`, "warn")}
+          ${kpi("Decision for the dashboard", "ε = 1", "per statistic; merge or suppress cells under 200")}</div>
+        <div class="chart">${hbars(rows, { min: 0, max: Math.max(20, Math.ceil(Math.max(...rows.map((r) => r.value)) / 10) * 10), fmt: (v) => num(v, 1), L: 300, aria: "Error by group" })}</div>`;
+    } else if (state.eth === "fair") {
+      const M = { calorie_mae: ["Calorie error (MAE, kcal)", 1], tier_accuracy: ["Tier accuracy", 3], sedentary_recall: ["Sedentary users found (recall)", 3] };
+      const rows = D.fairness.filter((r) => r.metric === state.fair);
+      const vals = rows.flatMap((r) => [r.ci_low, r.ci_high]);
+      const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * 0.15;
+      const attr = { gender: "Gender", location: "Location", age_band: "Age" };
+      const rep = D.replication;
+      body = `<p class="csub">The 1,000 held-out test users, by recorded group, with 95% bootstrap intervals.</p>
+        <div class="seg-row">${seg("fair", "Metric", Object.entries(M).map(([k, v]) => [k, v[0]]), state.fair)}</div>
+        <div class="chart">${dotplot(rows.map((r) => ({ label: `${attr[r.attribute]} · ${r.group}`, value: r.value, lo: r.ci_low, hi: r.ci_high, n: r.n })),
+          { min: lo - pad, max: hi + pad, fmt: (v) => num(v, M[state.fair][1]), aria: M[state.fair][0] })}</div>
+        <p class="sectionlabel">The one gap, re-checked</p>
+        ${table(["Location", "Test set", "Test set, no demographics", "3,997 training users (out of fold)"], rep.map((r) =>
+          [r.location, pct(r["test set, model with demographics"]), pct(r["test set, model without demographics"]), `<b>${pct(r["training users, out-of-fold"])}</b>`]), [1, 2, 3])}
+        <p class="note">The Suburban gap in the test set does not come from the model and does not replicate (χ² p = .32):
+        audits need intervals and replication before anyone acts. Unrecorded groups remain untested.</p>`;
+    } else {
+      const L = D.label;
+      body = `<p class="csub">Share of each intensity quarter (kcal per session) in each tier. If the label measured activity,
+        the hardest-working quarter would be mostly Active.</p>
+        <table class="tbl heat"><thead><tr><th>Intensity quarter</th>${TIERS.map((t) => `<th class="r">${t}</th>`).join("")}</tr></thead><tbody>
+        ${L.map((r) => `<tr><td>${esc(r.intensity_quartile)}</td>${TIERS.map((t) => `<td class="r" style="background:${mix("#f6f3ee", "#9fc4b4", (r[t] - 25) / 15)}">${num(r[t], 1)}%</td>`).join("")}</tr>`).join("")}
+        </tbody></table>
+        <div class="kpis k3" style="margin-top:14px">${kpi("Sedentary users above the lowest Active user", "29%", "474 of 1,634", "warn")}
+          ${kpi("Tier share in every quarter", "31–36%", "intensity makes no difference")}${kpi("What the label measures", "App use", "not physical activity")}</div>
+        <p class="note">Activity outside the app (kapa haka, waka ama, team sport, physical work) never reaches the label, and
+        what goes untracked differs by culture and occupation: a measurement bias to design out.</p>`;
+    }
+    return `<div class="cardhead"><div><h2 class="ctitle">Ethics: measured on the data, not asserted</h2></div>
+      ${seg("eth", "Topic", [["reid", "Re-identification"], ["dp", "Differential privacy"], ["fair", "Subgroup audit"], ["label", "Label validity"]], state.eth)}</div>${body}`;
+  }
+
+  function panelEthics() {
+    const stages = [...new Set(D.guidelines.map((g) => g.sdlc_phase))];
+    return `<p class="sectionlabel">Twelve guidelines, each with a check</p>${stages.map((s) => `<p class="stage">${esc(s)}</p>
+      <ul class="guide">${D.guidelines.filter((g) => g.sdlc_phase === s).map((g) => `<li><span class="gid">${g.id}</span>
+      <span class="gt">${esc(g.guideline)}</span><span class="gc">${esc(dashes(g.check))}</span></li>`).join("")}</ul>`).join("")}
+      <p class="attrib">Anchored in the Privacy Act 2020 (incl. IPP 3A), GDPR, ISO/IEC 27001 and 27701, OWASP MASVS v2.1, the ACM
+      Code, NIST AI RMF, Te Mana Raraunga and the Algorithm Charter for Aotearoa New Zealand.</p>`;
+  }
+
+  const VIEWS = { overview: [viewOverview, panelOverview], engagement: [viewEngagement, panelEngagement],
+    models: [viewModels, panelModels], ethics: [viewEthics, panelEthics] };
+  const SUBS = { overview: "Data validation, headline numbers and the main findings.",
+    engagement: "The structure of engagement and twelve pre-stated demographic tests.",
+    models: "Three models against their baselines and theoretical ceilings, and two evaluation traps.",
+    ethics: "Re-identification risk, differential privacy, a subgroup audit and label validity, with twelve guidelines." };
+
+  function render() {
+    const [v, p] = VIEWS[state.view];
+    document.getElementById("mainbody").innerHTML = v();
+    document.getElementById("panel").innerHTML = p();
+    document.getElementById("subtitle").textContent = SUBS[state.view];
+    document.querySelectorAll("#views button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+    for (const [id, key] of [["eng", "eng"], ["model", "model"], ["cost", "cost"], ["eth", "eth"], ["eps", "eps"], ["fair", "fair"]]) {
+      const host = document.getElementById(id);
+      if (host) host.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+        state[key] = key === "eps" ? Number(b.dataset.v) : b.dataset.v; render(); }));
+    }
+  }
+
+  document.getElementById("byline").textContent = D.meta.byline;
+  document.querySelectorAll("#views button").forEach((b) => b.addEventListener("click", () => {
+    state.view = b.dataset.view; history.replaceState(null, "", "#" + state.view); render(); }));
+  const fromHash = location.hash.replace("#", "");
+  if (VIEWS[fromHash]) state.view = fromHash;
+  render();
+})();
+</script>
+</body>
+</html>

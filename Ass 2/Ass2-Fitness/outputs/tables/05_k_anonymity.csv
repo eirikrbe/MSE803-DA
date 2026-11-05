@@ -1,0 +1,8 @@
+quasi_identifiers,columns,classes,min_k,pct_unique,pct_below_k5
+A. gender + age + location,"gender, age, location",252,10,0.0,0.0
+B. A + activity tier,"gender, age, location, activity_level",756,1,0.08,10.366
+C. A + exact sessions,"gender, age, location, app_sessions",4709,1,88.713,100.0
+"D. A + exact sessions, distance and calories","gender, age, location, app_sessions, distance_km, calories",4997,1,100.0,100.0
+"E. exact sessions, distance and calories only","app_sessions, distance_km, calories",4992,1,99.8,100.0
+F. gender + age band + location + tier,"gender, age_band, location, activity_level",72,47,0.0,0.0
+G. F + calories in 100-kcal bands,"gender, age_band, location, activity_level, calories_band",390,1,0.34,2.722

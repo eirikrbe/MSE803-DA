@@ -1,0 +1,6 @@
+feature,r2_drop_mean,r2_drop_sd
+app_sessions,1.2125,0.0287
+distance_km,0.011,0.0026
+location,-0.002,0.0022
+age,-0.0021,0.004
+gender,-0.0023,0.0008

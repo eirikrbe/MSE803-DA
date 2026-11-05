@@ -1,0 +1,4 @@
+activity_level,n,sessions,distance_km,calories,km_per_session,kcal_per_session,age,male_pct
+Active,1632,174.2,129.29,606.0,0.74,3.48,38.21,49.75
+Moderate,1734,124.16,92.55,432.08,0.75,3.48,38.62,52.19
+Sedentary,1634,74.81,55.89,259.1,0.75,3.46,38.43,50.24

@@ -1,0 +1,4 @@
+model,mean,std
+1-nearest neighbour,0.0253,0.0135
+Logistic regression,0.0032,0.0119
+"Random forest, unlimited depth",0.0207,0.0132

@@ -1,0 +1,58 @@
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from statsmodels.multivariate.manova import MANOVA
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# 1. Load audited Excel dataset
+df = pd.read_excel('Group_3.xlsx')
+
+X_g3 = df[['PL', 'PW']]
+y = df['Species']
+
+print("==================================================")
+print(" GROUP 3: MULTIVARIATE & HYPOTHESIS PIPELINE")
+print("==================================================")
+
+# 2. MANOVA Test
+ma_g3 = MANOVA.from_formula('PL + PW ~ Species', data=df)
+print("\n--- MANOVA Test Output ---")
+print(ma_g3.mv_test().summary())
+
+# 3. Explicit Group 3 Hypothesis Evaluation (PL > 5.0 cm)
+pl_gt_5 = df[df['PL'] > 5.0]
+print("\n--- Group 3 Hypothesis Evaluation (PL > 5.0 cm) ---")
+print(f"Total instances with PL > 5.0 cm: {len(pl_gt_5)}")
+print("Species breakdown for PL > 5.0 cm:")
+print(pl_gt_5['Species'].value_counts())
+
+non_virginica_count = len(pl_gt_5[pl_gt_5['Species'] != 'Iris-virginica'])
+if non_virginica_count == 0:
+    print("\n[VERDICT]: Accept H1. Every flower with PL > 5cm is ALWAYS Iris virginica.")
+else:
+    print(f"\n[VERDICT]: Accept H0. Found {non_virginica_count} non-virginica instance(s) with PL > 5cm.")
+
+# 4. Machine Learning Classification (Random Forest)
+rf_g3 = RandomForestClassifier(n_estimators=100, random_state=42)
+rf_g3.fit(X_g3, y)
+df['Pred_Group3_Python'] = rf_g3.predict(X_g3)
+
+print(f"\n--> Random Forest Model Accuracy: {accuracy_score(y, df['Pred_Group3_Python']) * 100:.2f}%")
+print("\n--- Classification Report ---")
+print(classification_report(y, df['Pred_Group3_Python']))
+
+# 5. Scatter Plot Visualization with Threshold Lines
+plt.figure(figsize=(8, 6))
+sns.scatterplot(data=df, x='PL', y='PW', hue='Species', palette='Set1', s=70)
+plt.title('Group 3: Petal Dimensions (PL vs PW) & Split Boundaries')
+plt.xlabel('Petal Length (PL) [cm]')
+plt.ylabel('Petal Width (PW) [cm]')
+plt.axvline(2.45, color='gray', linestyle='--', label='Setosa Split (2.45cm)')
+plt.axvline(5.0, color='red', linestyle=':', label='Hypothesis Threshold (5.0cm)')
+plt.legend()
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+
+# 6. Export Completed File
+df.to_excel('Group3_Final_Completed.xlsx', index=False)

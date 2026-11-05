@@ -1,0 +1,16 @@
+=IFS(A2<=5.45, "Iris-setosa", B2<=2.95, "Iris-versicolor", TRUE, "Iris-virginica")
+
+Setosa Row
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-setosa")
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-versicolor")
+=COUNTIFS($E$2:$E$151, "Iris-setosa", $F$2:$F$151, "Iris-virginica")
+
+Versicolor Row
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-setosa")
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-versicolor")
+=COUNTIFS($E$2:$E$151, "Iris-versicolor", $F$2:$F$151, "Iris-virginica")
+
+Virginica Row
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-setosa")
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-versicolor")
+=COUNTIFS($E$2:$E$151, "Iris-virginica", $F$2:$F$151, "Iris-virginica")

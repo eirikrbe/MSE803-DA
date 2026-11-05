@@ -1,0 +1,28 @@
+outcome,attribute,group,n,mean,ci_low,ci_high,overall_mean
+App sessions,gender,Female,2462,124.619,122.9218,126.3163,124.3664
+App sessions,gender,Male,2538,124.1214,122.4708,125.7719,124.3664
+App sessions,location,Urban,1638,125.7924,123.6647,127.9201,124.3664
+App sessions,location,Suburban,1678,123.0298,121.0129,125.0466,124.3664
+App sessions,location,Rural,1684,124.3112,122.3067,126.3157,124.3664
+App sessions,age_band,18–29,1460,124.6712,122.433,126.9094,124.3664
+App sessions,age_band,30–39,1156,124.8901,122.4372,127.3431,124.3664
+App sessions,age_band,40–49,1217,123.41,121.0022,125.8178,124.3664
+App sessions,age_band,50–59,1167,124.4636,122.0837,126.8434,124.3664
+km per session,gender,Female,2461,0.7446,0.739,0.7503,0.7449
+km per session,gender,Male,2536,0.7451,0.7395,0.7508,0.7449
+km per session,location,Urban,1636,0.7458,0.7388,0.7528,0.7449
+km per session,location,Suburban,1678,0.7437,0.7367,0.7506,0.7449
+km per session,location,Rural,1683,0.7452,0.7383,0.7521,0.7449
+km per session,age_band,18–29,1460,0.7485,0.741,0.7559,0.7449
+km per session,age_band,30–39,1156,0.7427,0.7343,0.7512,0.7449
+km per session,age_band,40–49,1214,0.7458,0.7377,0.7539,0.7449
+km per session,age_band,50–59,1167,0.7415,0.7335,0.7496,0.7449
+kcal per session,gender,Female,2462,3.4825,3.4482,3.5167,3.4722
+kcal per session,gender,Male,2538,3.4622,3.4284,3.4959,3.4722
+kcal per session,location,Urban,1638,3.4472,3.4051,3.4894,3.4722
+kcal per session,location,Suburban,1678,3.4639,3.4225,3.5053,3.4722
+kcal per session,location,Rural,1684,3.5046,3.4633,3.546,3.4722
+kcal per session,age_band,18–29,1460,3.4705,3.4256,3.5155,3.4722
+kcal per session,age_band,30–39,1156,3.4941,3.4444,3.5437,3.4722
+kcal per session,age_band,40–49,1217,3.4329,3.3838,3.482,3.4722
+kcal per session,age_band,50–59,1167,3.4934,3.4442,3.5426,3.4722
