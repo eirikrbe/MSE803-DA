@@ -1,5 +1,6 @@
 model_a,model_b,a_right_b_wrong,a_wrong_b_right,p_value,p_holm
-Logistic regression,Gradient boosting,88,52,0.00296,0.01183
-Logistic regression,SVM (RBF kernel),32,17,0.04438,0.13315
-Logistic regression,Random forest,38,33,0.63531,1.0
-Logistic regression,Structural Bayes rule,26,24,0.88772,1.0
+Logistic regression: distance and calories,Logistic regression: all inputs,11,7,0.48068,1.0
+Logistic regression: distance and calories,Gradient boosting,91,51,0.00099,0.00497
+Logistic regression: distance and calories,SVM (RBF kernel),39,20,0.01834,0.07335
+Logistic regression: distance and calories,Random forest,45,36,0.37417,1.0
+Logistic regression: distance and calories,Structural Bayes rule,27,21,0.47088,1.0

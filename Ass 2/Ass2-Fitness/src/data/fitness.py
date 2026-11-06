@@ -86,3 +86,34 @@ def load_users():
     df['gender'] = pd.Categorical(df['gender'], GENDERS)
     df['age_band'] = pd.Categorical(df['age_band'], AGE_LABELS, ordered=True)
     return df
+
+
+# Inference contract for the tier model (notebook 04). The model reads only
+# distance and calories, so the checks are on those two numbers: present,
+# positive, and consistent with the per-session invariants found in 02
+# (0.5-1.0 km and 2-5 kcal per session, sessions 50-199).
+KM_PER_SESSION = (0.5, 1.0)
+KCAL_PER_SESSION = (2.0, 5.0)
+SESSION_RANGE = (50, 199)
+
+
+def check_tier_inputs(distance_km, calories):
+    """Why each imported (distance, calories) pair falls outside what the tier
+    model was built on; an empty string means it passes.
+
+    A pair passes when some whole number of sessions in SESSION_RANGE could have
+    produced both values: distance / 1.0 <= sessions <= distance / 0.5 and
+    calories / 5 <= sessions <= calories / 2 (half a unit of rounding allowed).
+    A record that fails should not get a model prediction: the app falls back to
+    asking the user, or to the default starting plan.
+    """
+    d = pd.to_numeric(pd.Series(distance_km), errors='coerce').to_numpy(float)
+    c = pd.to_numeric(pd.Series(calories), errors='coerce').to_numpy(float)
+    lo = np.maximum.reduce([(d - 0.5) / KM_PER_SESSION[1], (c - 0.5) / KCAL_PER_SESSION[1],
+                            np.full_like(d, SESSION_RANGE[0])])
+    hi = np.minimum.reduce([(d + 0.5) / KM_PER_SESSION[0], (c + 0.5) / KCAL_PER_SESSION[0],
+                            np.full_like(d, SESSION_RANGE[1])])
+    reasons = np.where(np.isnan(d) | np.isnan(c), 'missing value',
+              np.where((d <= 0) | (c <= 0), 'not positive',
+              np.where(np.ceil(lo) > np.floor(hi), 'no session count fits both values', '')))
+    return pd.Series(reasons, index=distance_km.index if isinstance(distance_km, pd.Series) else None, name='contract_violation')

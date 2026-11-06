@@ -10,6 +10,7 @@ import pathlib
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
+from src.paths import DASHBOARDS
 from src.visualization.dashboard import MIN_CELL, TEMPLATE, suppress_small
 
 
@@ -27,6 +28,11 @@ def test_small_counts_are_suppressed_and_zeros_kept():
 
 def test_threshold_is_at_least_five():
     assert MIN_CELL >= 5, 'publishing groups smaller than five users breaks guideline G6'
+
+
+def test_published_dashboard_does_not_include_record_ids():
+    html = (DASHBOARDS / 'fitness_dashboard.html').read_text(encoding='utf-8')
+    assert not re.search(r'\buser\s+\d{3,}\b|\bIDs?\s+\d{3,}\b', html, re.IGNORECASE)
 
 
 if __name__ == '__main__':
