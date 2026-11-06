@@ -4,7 +4,7 @@ Four views, in the order a reader needs them:
 
   Overview     the validation outcome, the headline numbers and the findings (01, 02)
   Engagement   the structure of engagement and the twelve demographic tests (02, 03)
-  Models       the three models against their baselines and ceilings, and the two traps (04)
+  Models       the three models against their baselines and structural benchmarks, and the two traps (04)
   Ethics       re-identification, differential privacy, subgroup audit, label validity, guidelines (05)
 
 Aggregates only, by design (guideline G6 in notebook 05): the page carries the results tables and one

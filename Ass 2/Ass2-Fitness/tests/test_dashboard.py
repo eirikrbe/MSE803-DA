@@ -35,6 +35,22 @@ def test_published_dashboard_does_not_include_record_ids():
     assert not re.search(r'\buser\s+\d{3,}\b|\bIDs?\s+\d{3,}\b', html, re.IGNORECASE)
 
 
+def test_template_model_lookups_exist_in_data():
+    """Every model the page looks up by name must be in the data, or the view crashes and renders empty."""
+    from src.visualization.dashboard import dashboard_data
+    data = dashboard_data()
+    template = TEMPLATE.read_text(encoding='utf-8')
+    for kind, key in (('clf', 'classification'), ('reg', 'regression')):
+        names = {r['model'] for r in data[key]}
+        for name in re.findall(kind + r'\("([^"]+)"\)', template):
+            assert name in names, f'{kind}("{name}") is not in the dashboard data'
+    # Model lists the views iterate over must match the data too.
+    every = {r['model'] for key in ('classification', 'regression') for r in data[key]}
+    for block in re.findall(r'const order = \[(.*?)\];', template, re.S):
+        for name in re.findall(r'"([^"]+)"', block):
+            assert name in every, f'"{name}" in a model order list is not in the dashboard data'
+
+
 if __name__ == '__main__':
     tests = [(n, f) for n, f in sorted(globals().items())
              if n.startswith('test_') and callable(f)]
