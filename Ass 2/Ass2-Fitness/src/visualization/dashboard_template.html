@@ -418,7 +418,7 @@ window.DATA = __DATA__;
 
   function viewOverview() {
     const lin = reg("Linear: sessions only"), lg = clf("Logistic regression: distance and calories"), base = clf("Majority-class baseline"),
-      bay = clf("Structural Bayes rule (reference ceiling)");
+      bay = clf("Structural Bayes rule (reference benchmark)");
     const tot = D.flow.reduce((a, b) => a + b.n, 0);
     const segc = { kept: "s-kept", copy: "s-copy", alt: "s-alt" };
     const klass = { "Data-integrity error": "k-int", "Statistical outlier": "k-out", "Missing data": "k-miss", "Critical anomaly": "k-crit" };
@@ -427,8 +427,8 @@ window.DATA = __DATA__;
       Every number on this page is an aggregate from the analysis notebooks.</p></div></div>
       <div class="kpis k4">
         ${kpi("Users after validation", thou(D.meta.n_users), `of ${thou(D.meta.n_raw)} records`, "acc")}
-        ${kpi("Calorie model, test R²", num(lin.r2, 3), "95% CI 0.607–0.665 · theoretical ceiling 0.630")}
-        ${kpi("Tier classifier, accuracy", pct(lg.accuracy), `baseline ${pct(base.accuracy)} · ceiling ${pct(bay.accuracy)}`)}
+        ${kpi("Calorie model, test R²", num(lin.r2, 3), "95% CI 0.607–0.665 · structural benchmark 0.630")}
+        ${kpi("Tier classifier, accuracy", pct(lg.accuracy), `baseline ${pct(base.accuracy)} · benchmark ${pct(bay.accuracy)}`)}
         ${kpi("Unique on activity values", pct(kan("E.").pct_unique / 100), `k = ${kan("F.").min_k} after generalising`, "warn")}
       </div>
       <p class="sectionlabel">Where the 5,299 records went</p>
@@ -447,7 +447,7 @@ window.DATA = __DATA__;
       <li><b>Activity Level is a band of sessions:</b> 50–99, 100–149, 150–199, with no exceptions.</li>
       <li><b>Fixed rates:</b> every user travels 0.5–1.0 km and burns 2–5 kcal per session.</li>
       <li><b>No demographic differences:</b> all 12 pre-stated tests are negligible.</li>
-      <li><b>Models at the ceiling:</b> calories test R² 0.637 (95% CI 0.607–0.665), consistent with the theoretical 0.630; tier 78.6% against a 78.0% reference, chosen on training folds without demographics.</li>
+      <li><b>Models at their structural benchmarks:</b> calories test R² 0.637 (95% CI 0.607–0.665), consistent with the assumption-based 0.630; tier 78.6% against a 78.0% reference, chosen on training folds without demographics.</li>
       <li><b>Privacy:</b> 99.8% of users are unique on their exact activity values alone.</li>
       <li><b>Label validity:</b> 29% of “Sedentary” users burned more than the lowest-burning “Active” user.</li></ul>
       <p class="sectionlabel">What they cannot show</p><ul class="list">
@@ -498,8 +498,8 @@ window.DATA = __DATA__;
         return { label: m.replace("x sessions", "× sessions"), value: r.r2, lo: ci ? +ci[1] : null, hi: ci ? +ci[2] : null,
           color: m.startsWith("Linear: sessions") ? COL.accent : (m.startsWith("Structural") ? COL.ink : COL.context) }; });
       const iv = (t, k) => D.intervals.find((r) => r.tier === t && r.interval === k);
-      body = `<p class="csub">Test R² on 1,000 held-out users, with 95% bootstrap intervals. Dashed: the analytic ceiling.</p>
-        <div class="chart">${hbars(rows, { min: 0, max: 0.7, nt: 7, fmt: (v) => num(v, 2), vfmt: (v) => num(v, 3), refs: [{ x: 0.63, label: "ceiling 0.630" }], aria: "Test R squared by model" })}</div>
+      body = `<p class="csub">Test R² on 1,000 held-out users, with 95% bootstrap intervals. Dashed: the structural benchmark, which assumes the inferred 2–5 kcal rate.</p>
+        <div class="chart">${hbars(rows, { min: 0, max: 0.7, nt: 7, fmt: (v) => num(v, 2), vfmt: (v) => num(v, 3), refs: [{ x: 0.63, label: "benchmark 0.630" }], aria: "Test R squared by model" })}</div>
         <p class="sectionlabel">80% prediction intervals: coverage by tier</p>
         ${table(["Tier", "Constant width", "Quantile regression", "Width (quantile)"], [...TIERS, "All users"].map((t) =>
           [t, pct(iv(t, "Constant width").coverage, 0), `<b>${pct(iv(t, "Quantile regression").coverage, 0)}</b>`, `${num(iv(t, "Quantile regression").mean_width, 0)} kcal`]), [1, 2, 3])}
@@ -507,9 +507,9 @@ window.DATA = __DATA__;
         coverage near 80% in every tier. Show calories as a range that widens with activity.</p>`;
     } else if (state.model === "tier") {
       const order = ["Majority-class baseline", "Logistic regression: demographics only", "Logistic regression: distance and calories", "Logistic regression: all inputs", "k-nearest neighbours (k = 25)",
-        "SVM (RBF kernel)", "Random forest", "Gradient boosting", "Structural Bayes rule (reference ceiling)"];
+        "SVM (RBF kernel)", "Random forest", "Gradient boosting", "Structural Bayes rule (reference benchmark)"];
       const rows = order.map((m) => { const r = clf(m); const ci = String(r.accuracy_ci || "").match(/(-?[\d.]+)-(-?[\d.]+)/);
-        return { label: m.replace(" (reference ceiling)", ""), value: r.accuracy, lo: ci ? +ci[1] : null, hi: ci ? +ci[2] : null,
+        return { label: m.replace(" (reference benchmark)", ""), value: r.accuracy, lo: ci ? +ci[1] : null, hi: ci ? +ci[2] : null,
           color: m === "Logistic regression: distance and calories" ? COL.accent : (m.startsWith("Structural") ? COL.ink : COL.context) }; });
       const cm = D.confusion, tot = cm.counts.map((r) => r.reduce((a, b) => a + b, 0));
       const op = D.thresholds.find((r) => r.miss_cost_ratio === state.cost);
@@ -535,7 +535,7 @@ window.DATA = __DATA__;
         <p class="sectionlabel">Rule-based segments instead: tier × intensity</p>
         ${table(["Tier", "Intensity (kcal per session)", "Users"], D.rule_segments.map((r) => [r.activity_level, r.intensity, thou(r.n)]), [2])}`;
     }
-    return `<div class="cardhead"><div><h2 class="ctitle">The models reach the ceiling the data allow</h2></div>
+    return `<div class="cardhead"><div><h2 class="ctitle">The models reach their structural benchmarks</h2></div>
       ${seg("model", "Model", [["calories", "Calories"], ["tier", "Tier"], ["segments", "Segments"]], state.model)}</div>${body}`;
   }
 
@@ -622,7 +622,7 @@ window.DATA = __DATA__;
     models: [viewModels, panelModels], ethics: [viewEthics, panelEthics] };
   const SUBS = { overview: "Data validation, headline numbers and the main findings.",
     engagement: "The structure of engagement and twelve pre-stated demographic tests.",
-    models: "Three models against their baselines and theoretical ceilings, and two evaluation traps.",
+    models: "Three models against their baselines and structural benchmarks, and two evaluation traps.",
     ethics: "Re-identification risk, differential privacy, a subgroup audit and label validity, with twelve guidelines." };
 
   function render() {
