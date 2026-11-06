@@ -26,9 +26,9 @@ follows the [MSE803 Analytics Template](../../MSE803-Analytics-Template/).
 
 ## Key results
 
-- **Data quality.** 299 of the 5,299 records (5.6%) were copies of users 3580–3855: 272 exact and 27 altered.
-  Two distances were ×10 entry errors (920 km and 10 km). A per-session rule caught both; the IQR and z-score
-  screens missed the 10 km value. 5,000 genuine users remain.
+- **Data quality.** 299 of the 5,299 records (5.6%) were duplicate records: 272 exact and 27 altered copies.
+  Two distance entries were ×10 errors. A per-session rule caught both; the IQR and z-score screens missed one.
+  5,000 genuine users remain.
 - **A rigid structure.** *Activity Level* is a banding of app sessions (50–99, 100–149, 150–199), with no
   exceptions. Every user travels 0.5–1.0 km and burns 2–5 kcal per session, spread evenly and independently.
   The data behave like a simulation.
