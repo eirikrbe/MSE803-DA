@@ -515,7 +515,7 @@ window.DATA = __DATA__;
       const op = D.thresholds.find((r) => r.miss_cost_ratio === state.cost);
       body = `<p class="csub">Tier from distance and calories (sessions excluded as leakage). The model was chosen on training folds by a rule fixed in advance; the test set only reports. Test accuracy with 95% intervals.</p>
         <div class="chart">${hbars(rows, { min: 0, max: 1, nt: 5, fmt: (v) => pct(v, 0), vfmt: (v) => pct(v, 1), L: 300,
-          refs: [{ x: clf("Majority-class baseline").accuracy, label: "baseline", anchor: "start" }, { x: 0.78, label: "ceiling", anchor: "end" }], aria: "Test accuracy by model" })}</div>
+          refs: [{ x: clf("Majority-class baseline").accuracy, label: "baseline", anchor: "start" }, { x: 0.78, label: "benchmark", anchor: "end" }], aria: "Test accuracy by model" })}</div>
         <p class="sectionlabel">Chosen model (logistic regression, distance and calories): where the errors fall</p>
         <table class="cm"><tr><th></th>${cm.labels.map((l) => `<th>Predicted ${esc(l)}</th>`).join("")}</tr>
         ${cm.counts.map((r, i) => `<tr><th>${esc(cm.labels[i])}</th>${r.map((c, j) => { const sh = c / tot[i];

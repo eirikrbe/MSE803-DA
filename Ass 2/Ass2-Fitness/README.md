@@ -17,7 +17,7 @@ four things:
 | [`01_data_understanding`](notebooks/Ass2-Fitness_01_data_understanding.ipynb) | Profiles the raw file and validates it record by record. Each problem gets one of four classifications (critical anomaly, data-integrity error, statistical outlier, missing data) and a decision backed by evidence. |
 | [`02_eda`](notebooks/Ass2-Fitness_02_eda.ipynb) | Applies the cleaning and computes what keeping each problem would have changed (the validation and management matrix). Describes the structure of engagement and the demographic profile. |
 | [`03_analysis`](notebooks/Ass2-Fitness_03_analysis.ipynb) | Tests twelve pre-stated hypotheses on demographic differences, with effect sizes, the Holm correction, equivalence (TOST) verdicts and a power analysis. |
-| [`04_modeling`](notebooks/Ass2-Fitness_04_modeling.ipynb) | Builds a calorie regression, a tier classifier and a k-means segmentation. Each is compared with a baseline and a structural ceiling. Every choice is made on cross-validation folds by a rule stated in advance, and the held-out test set is scored only afterwards. Also covers overfitting and calibration checks, prediction intervals, two leakage checks, a sensitivity analysis and an input contract. |
+| [`04_modeling`](notebooks/Ass2-Fitness_04_modeling.ipynb) | Builds a calorie regression, a tier classifier and a k-means segmentation. Each is compared with a baseline and an assumption-based structural benchmark. Every choice is made on cross-validation folds by a rule stated in advance, and the held-out test set is scored only afterwards. Also covers overfitting and calibration checks, prediction intervals, two leakage checks, a sensitivity analysis and an input contract. |
 | [`05_ethics`](notebooks/Ass2-Fitness_05_ethics.ipynb) | Measures re-identification risk (k-anonymity, l-diversity), the cost of differential privacy, subgroup performance with a replication check, and whether the activity label measures activity. Sets out twelve ethical guidelines and builds the dashboard. |
 
 The reusable code (loading, quality checks, statistical tests, model evaluation, clustering diagnostics, privacy
@@ -96,7 +96,7 @@ criterion sits.
 | Criterion | Evidence |
 |---|---|
 | Task 1 · Data analysis | `01`: validation and decisions; `02`: validation matrix, structure, demographic profile; `03`: hypothesis tests |
-| Task 1 · Model performance evaluation | `04`: baselines, cross-validation, held-out metrics with intervals, ceilings, McNemar, prediction intervals, leakage and sensitivity checks, software-engineering implications |
+| Task 1 · Model performance evaluation | `04`: baselines, cross-validation, held-out metrics with intervals, structural benchmarks, McNemar, prediction intervals, leakage and sensitivity checks, software-engineering implications |
 | Task 2 · Ethical implications | `05`: re-identification risk, generalisation, differential privacy |
 | Task 2 · Cultural relevance | `05`: representation audit, subgroup audit with replication, label validity, cultural factors |
 | Task 2 · Ethical guidelines | `05`: twelve guidelines by development stage, each with a check |
