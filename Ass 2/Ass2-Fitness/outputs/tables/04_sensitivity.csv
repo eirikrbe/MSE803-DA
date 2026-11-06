@@ -1,5 +1,5 @@
 variant,users,pearson_sessions_distance,calories_test_r2,tier_test_accuracy
-"As decided (copies removed, two distances blanked)",4997,0.8572,0.6374,0.782
-Two distances kept as recorded (920 and 10 km),4999,0.8221,0.6371,0.78
-Two distances corrected (92 and 100 km),4999,0.857,0.6373,0.779
-Copy block kept,5295,0.8591,0.6329,0.7847
+"As decided (copies removed, two distances blanked)",4997,0.8572,0.6373,0.786
+Two distances kept as recorded (920 and 10 km),4999,0.8221,0.6378,0.78
+Two distances corrected (92 and 100 km),4999,0.857,0.6378,0.781
+Copy block kept,5295,0.8591,0.6327,0.7913

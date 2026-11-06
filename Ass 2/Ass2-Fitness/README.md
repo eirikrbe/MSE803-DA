@@ -17,7 +17,7 @@ four things:
 | [`01_data_understanding`](notebooks/Ass2-Fitness_01_data_understanding.ipynb) | Profiles the raw file and validates it record by record. Each problem gets one of four classifications (critical anomaly, data-integrity error, statistical outlier, missing data) and a decision backed by evidence. |
 | [`02_eda`](notebooks/Ass2-Fitness_02_eda.ipynb) | Applies the cleaning and computes what keeping each problem would have changed (the validation and management matrix). Describes the structure of engagement and the demographic profile. |
 | [`03_analysis`](notebooks/Ass2-Fitness_03_analysis.ipynb) | Tests twelve pre-stated hypotheses on demographic differences, with effect sizes, the Holm correction, equivalence (TOST) verdicts and a power analysis. |
-| [`04_modeling`](notebooks/Ass2-Fitness_04_modeling.ipynb) | Builds a calorie regression, a tier classifier and a k-means segmentation. Each is compared with a baseline and a structural ceiling, using cross-validation and a held-out test set. Also covers prediction intervals, two leakage checks and a sensitivity analysis. |
+| [`04_modeling`](notebooks/Ass2-Fitness_04_modeling.ipynb) | Builds a calorie regression, a tier classifier and a k-means segmentation. Each is compared with a baseline and a structural ceiling. Every choice is made on cross-validation folds by a rule stated in advance, and the held-out test set is scored only afterwards. Also covers overfitting and calibration checks, prediction intervals, two leakage checks, a sensitivity analysis and an input contract. |
 | [`05_ethics`](notebooks/Ass2-Fitness_05_ethics.ipynb) | Measures re-identification risk (k-anonymity, l-diversity), the cost of differential privacy, subgroup performance with a replication check, and whether the activity label measures activity. Sets out twelve ethical guidelines and builds the dashboard. |
 
 The reusable code (loading, quality checks, statistical tests, model evaluation, clustering diagnostics, privacy
@@ -37,11 +37,18 @@ follows the [MSE803 Analytics Template](../../MSE803-Analytics-Template/).
 - **Models at their ceilings.**
   - Calories: linear regression on sessions scores R² 0.637 on 1,000 held-out users (95% CI 0.607–0.665; MAE 92 kcal),
     consistent with the theoretical ceiling of 0.630. Random forest and gradient boosting do no better.
-  - Tier from distance and calories: logistic regression scores 78.2% (macro F1 0.782, ROC-AUC 0.927), against
-    a 34.7% baseline and a structural Bayes ceiling of 78.0% (point estimate; McNemar p = .89).
+  - Tier from distance and calories: logistic regression, chosen on the training folds by a rule stated in
+    advance (one-standard-error rule, simplest tied model), scores 78.6% on the test set (95% CI 76.0–81.1; macro
+    F1 0.786, ROC-AUC 0.927). The baseline is 34.7% and the structural Bayes ceiling 78.0% (point estimate;
+    McNemar p = .47). Adding age, gender and location changes nothing (78.2%), and the probabilities are well
+    calibrated (calibration slopes 0.98–1.11).
+  - Overfitting: gradient boosting and the random forest score 11.8 and 6.4 points higher on their training
+    folds than on validation folds; logistic regression 0.2.
   - Segmentation: no natural segments (Hopkins 0.49, silhouette ≤ 0.28 at every k).
 - **Two traps.** Predicting the tier from sessions scores 100% (leakage). Keeping the copies would flatter
   memorising models by up to 2.5 points and would rank the random forest above logistic regression.
+- **An input contract.** A distance and a calorie count are accepted only if some session count could have
+  produced both. The contract rejects both ×10 errors without needing sessions.
 - **Privacy.** 99.8% of users are unique on their exact sessions, distance and calories alone. Generalising age
   and replacing sessions with the tier gives groups of at least 47.
 - **Label validity.** 29% of "Sedentary" users burned more calories than the lowest-burning "Active" user. The

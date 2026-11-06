@@ -102,6 +102,15 @@ def test_reports_survive_an_all_missing_column():
     assert missing_report(df).loc['empty', 'missing_pct'] == 100.0
 
 
+def test_tier_input_contract():
+    from src.data.fitness import check_tier_inputs
+    r = check_tier_inputs([60, 60, None, -1, 920, 10], [300, 100, 200, 200, 909, 245]).tolist()
+    assert r[0] == '', '60 km and 300 kcal fit 60 sessions'
+    assert r[1] == 'no session count fits both values', '100 kcal needs at most 50 sessions, 60 km at least 60'
+    assert r[2] == 'missing value' and r[3] == 'not positive'
+    assert r[4] == r[5] == 'no session count fits both values', 'the two x10 slips found in 01'
+
+
 if __name__ == '__main__':
     tests = [(n, f) for n, f in sorted(globals().items())
              if n.startswith('test_') and callable(f)]

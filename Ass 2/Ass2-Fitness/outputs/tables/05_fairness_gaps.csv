@@ -1,10 +1,10 @@
 metric,attribute,groups,min,max,gap,ratio,all_intervals_overlap
 calorie_mae,gender,2,90.2712,92.833,2.5618,1.0284,True
-tier_accuracy,gender,2,0.7787,0.7854,0.0068,1.0087,True
-sedentary_recall,gender,2,0.8497,0.9286,0.0789,1.0928,True
+tier_accuracy,gender,2,0.7787,0.7935,0.0149,1.0191,True
+sedentary_recall,gender,2,0.8728,0.9221,0.0492,1.0564,True
 calorie_mae,location,3,89.5516,94.9616,5.4101,1.0604,True
-tier_accuracy,location,3,0.7364,0.8232,0.0868,1.1179,True
-sedentary_recall,location,3,0.8125,0.9364,0.1239,1.1524,False
+tier_accuracy,location,3,0.7364,0.8293,0.0929,1.1262,False
+sedentary_recall,location,3,0.8304,0.9364,0.106,1.1277,True
 calorie_mae,age_band,4,85.1681,98.8115,13.6434,1.1602,True
-tier_accuracy,age_band,4,0.7531,0.8174,0.0643,1.0854,True
-sedentary_recall,age_band,4,0.8625,0.9167,0.0542,1.0628,True
+tier_accuracy,age_band,4,0.7572,0.8261,0.0689,1.091,True
+sedentary_recall,age_band,4,0.8554,0.9239,0.0685,1.0801,True
